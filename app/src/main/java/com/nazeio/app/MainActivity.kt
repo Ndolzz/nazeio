@@ -17,12 +17,13 @@ import com.nazeio.app.ui.BerandaScreen
 import com.nazeio.app.ui.NavigasiBawah
 import com.nazeio.app.ui.NazeioTheme
 import com.nazeio.app.ui.PengaturanScreen
+import com.nazeio.app.ui.PengingatScreen
 import com.nazeio.app.ui.RiwayatScreen
 import com.nazeio.app.widget.StatusBersama
 
 /**
- * Aktivitas utama: empat tab bawah sesuai desain
- * (Beranda, Riwayat, Alias, Pengaturan).
+ * Aktivitas utama: lima tab bawah sesuai desain
+ * (Beranda, Riwayat, Pengingat, Alias, Pengaturan).
  */
 class MainActivity : ComponentActivity() {
 
@@ -50,7 +51,8 @@ class MainActivity : ComponentActivity() {
                         when (tab) {
                             0 -> BerandaScreen()
                             1 -> RiwayatScreen()
-                            2 -> AliasScreen()
+                            2 -> PengingatScreen()
+                            3 -> AliasScreen()
                             else -> PengaturanScreen()
                         }
                     }

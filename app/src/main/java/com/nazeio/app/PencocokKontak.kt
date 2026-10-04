@@ -10,13 +10,18 @@ object PencocokKontak {
     private const val AMBANG = 0.6
     private const val RENTANG = 0.05
 
-    fun pilih(ucapan: String, kandidat: List<Kontak>): List<Kontak> {
+    /** Mengembalikan kontak terpilih beserta skornya. */
+    fun pilihDenganSkor(ucapan: String, kandidat: List<Kontak>): List<Pair<Kontak, Double>> {
         if (kandidat.isEmpty()) return emptyList()
         val skor = kandidat
             .map { it to PencocokNama.jaroWinkler(ucapan, it.nama.lowercase()) }
             .filter { it.second >= AMBANG }
             .sortedByDescending { it.second }
         val terbaik = skor.firstOrNull()?.second ?: return emptyList()
-        return skor.filter { it.second >= terbaik - RENTANG }.map { it.first }
+        return skor.filter { it.second >= terbaik - RENTANG }.map { it.first to it.second }
+    }
+
+    fun pilih(ucapan: String, kandidat: List<Kontak>): List<Kontak> {
+        return pilihDenganSkor(ucapan, kandidat).map { it.first }
     }
 }

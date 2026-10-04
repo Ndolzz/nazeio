@@ -21,6 +21,9 @@ class PemrosesPerintah(private val context: Context) {
     /** Nama aplikasi yang menunggu jawaban konfirmasi pengguna. */
     private var konfirmasiTertunda: String? = null
 
+    /** Kontak yang menunggu jawaban konfirmasi sebelum menelepon. */
+    private var konfirmasiTeleponTertunda: Kontak? = null
+
     sealed class Hasil {
         data class Selesai(val pesan: String) : Hasil()
         data class Bicara(val pesan: String) : Hasil()
@@ -42,6 +45,21 @@ class PemrosesPerintah(private val context: Context) {
                 val app = peluncur.daftarAplikasi().firstOrNull { it.label == tertunda }
                 return if (app != null && peluncur.buka(app)) Hasil.Selesai("Membuka " + app.label)
                 else Hasil.Bicara("Aplikasi tidak ditemukan")
+            }
+            // Bukan jawaban konfirmasi, lanjut memproses ucapan baru.
+        }
+
+        // Jawaban atas konfirmasi kontak dengan skor rendah sebelum menelepon.
+        val tertundaTelepon = konfirmasiTeleponTertunda
+        if (tertundaTelepon != null) {
+            konfirmasiTeleponTertunda = null
+            if (bersih == "iya" || bersih == "ya" || bersih == "benar") {
+                val pemanggil = PemanggilTelepon(context)
+                return if (pemanggil.bukaDialer(tertundaTelepon.nomor)) {
+                    Hasil.Selesai("Membuka dialer untuk " + tertundaTelepon.nama)
+                } else {
+                    Hasil.Bicara("Dialer tidak bisa dibuka")
+                }
             }
             // Bukan jawaban konfirmasi, lanjut memproses ucapan baru.
         }
@@ -150,15 +168,21 @@ class PemrosesPerintah(private val context: Context) {
                 return Hasil.Bicara("Izin kontak belum diberikan. Buka aplikasi Nazeio lalu berikan izin kontak")
             }
             // Kandidat disaring dengan kandungan nama lalu dipilih yang paling mirip.
-            val kontak = PencocokKontak.pilih(tujuan, pemanggil.cariKontak(tujuan))
-            if (kontak.isEmpty()) return Hasil.Bicara("Kontak tidak ditemukan")
-            if (kontak.size > 1) {
+            val skor = PencocokKontak.pilihDenganSkor(tujuan, pemanggil.cariKontak(tujuan))
+            if (skor.isEmpty()) return Hasil.Bicara("Kontak tidak ditemukan")
+            if (skor.size > 1) {
                 return Hasil.Bicara(
-                    "Ada beberapa yang mirip: " + kontak.take(3).joinToString(", ") { it.nama }
+                    "Ada beberapa yang mirip: " + skor.take(3).joinToString(", ") { it.first.nama }
                 )
             }
-            return if (pemanggil.bukaDialer(kontak[0].nomor)) {
-                Hasil.Selesai("Membuka dialer untuk " + kontak[0].nama)
+            val (kontak, nilai) = skor[0]
+            if (nilai < 0.9) {
+                // Kecocokan kontak di bawah 0,9 wajib dikonfirmasi lisan lebih dulu.
+                konfirmasiTeleponTertunda = kontak
+                return Hasil.Bicara("Kamu maksud " + kontak.nama + ". Sebut iya untuk menelepon")
+            }
+            return if (pemanggil.bukaDialer(kontak.nomor)) {
+                Hasil.Selesai("Membuka dialer untuk " + kontak.nama)
             } else {
                 Hasil.Bicara("Dialer tidak bisa dibuka")
             }
@@ -183,8 +207,8 @@ class PemrosesPerintah(private val context: Context) {
         val label = daftar.map { it.label }
         val cocok = PencocokNama.cariSkor(bersih, label)
         if (cocok.size == 1) {
-            val (nama, skor) = cocok[0]
-            if (skor < 0.9) {
+            val (nama, skorApp) = cocok[0]
+            if (skorApp < 0.9) {
                 // Kecocokan di bawah 0,9 wajib dikonfirmasi lisan lebih dulu.
                 konfirmasiTertunda = nama
                 return Hasil.Bicara("Kamu maksud " + nama + ". Sebut iya untuk membuka")

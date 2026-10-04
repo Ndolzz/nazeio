@@ -44,4 +44,13 @@ object Riwayat {
             dao.pangkas()
         }
     }
+
+    /** Mengosongkan riwayat di memori dan di database. */
+    fun hapusSemua() {
+        entri.clear()
+        val db = aplikasi ?: return
+        scope.launch {
+            NazeioDatabase.ambil(db).riwayatDao().hapusSemua()
+        }
+    }
 }

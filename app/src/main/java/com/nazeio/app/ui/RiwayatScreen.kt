@@ -14,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -25,6 +26,7 @@ import com.nazeio.app.Riwayat
 /**
  * Layar Riwayat sesuai desain: daftar aksi dan hasil
  * terbaru, dengan keadaan kosong bila belum ada.
+ * Tombol hapus semua mengosongkan riwayat permanen.
  */
 @Composable
 fun RiwayatScreen() {
@@ -55,12 +57,22 @@ fun RiwayatScreen() {
                 .padding(horizontal = 16.dp)
         ) {
             item {
-                Text(
-                    text = "Riwayat",
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 20.dp, bottom = 12.dp)
-                )
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 20.dp, bottom = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = "Riwayat",
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight.Bold,
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = { Riwayat.hapusSemua() }) {
+                        Text("Hapus semua")
+                    }
+                }
             }
             items(Riwayat.entri) { e ->
                 Card(

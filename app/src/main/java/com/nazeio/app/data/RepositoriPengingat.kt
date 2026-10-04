@@ -39,10 +39,29 @@ class RepositoriPengingat(private val context: Context) {
         }
     }
 
+    /** Membatalkan alarm satu pengingat, dipakai saat pengguna menghapusnya. */
+    fun batalkanAlarm(kode: Int): Boolean {
+        return try {
+            val am = context.getSystemService(AlarmManager::class.java) ?: return false
+            val niat = Intent(context, PenerimaPengingat::class.java)
+                .putExtra(PenerimaPengingat.EXTRA_ID, kode)
+            val pi = PendingIntent.getBroadcast(
+                context, kode, niat, PendingIntent.FLAG_IMMUTABLE
+            )
+            am.cancel(pi)
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
     suspend fun semua(): List<PengingatEntity> {
         dao.hapusLewati(System.currentTimeMillis())
         return dao.semua()
     }
 
-    suspend fun hapus(kode: Int) = dao.hapus(kode)
+    suspend fun hapus(kode: Int) {
+        batalkanAlarm(kode)
+        dao.hapus(kode)
+    }
 }
