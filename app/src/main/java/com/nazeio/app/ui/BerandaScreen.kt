@@ -11,10 +11,14 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,22 +34,29 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.nazeio.app.AksiPengaturan
+import com.nazeio.app.KlienModel
 import com.nazeio.app.NormalisasiTeks
 import com.nazeio.app.PeluncurAplikasi
+import com.nazeio.app.Pembicara
 import com.nazeio.app.PencocokNama
 import com.nazeio.app.PengenalSuara
+import com.nazeio.app.data.Pengaturan
 import com.nazeio.app.data.RepositoriAlias
 import kotlinx.coroutines.launch
 
 /**
- * Layar Beranda: tombol mikrofon besar, status, dan hasil pemrosesan ucapan.
- * Menerapkan spesifikasi 01 dan 02: buka aplikasi, alias, aksi pengaturan.
+ * Layar Beranda sesuai spesifikasi 01, 02, dan 03.
+ * Ucapan dicocokkan dengan alias, lalu aplikasi, lalu model bahasa.
  */
 @Composable
-fun BerandaScreen(bukaLayarAlias: () -> Unit) {
+fun BerandaScreen(
+    bukaLayarAlias: () -> Unit,
+    bukaLayarPengaturan: () -> Unit
+) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
-    var status by remember { mutableStateOf("Tekan mikrofon lalu sebutkan nama aplikasi") }
+    var status by remember { mutableStateOf("Tekan mikrofon lalu bicara") }
+    var jawaban by remember { mutableStateOf("") }
     var mendengar by remember { mutableStateOf(false) }
     var adaIzin by remember {
         mutableStateOf(
@@ -56,7 +67,14 @@ fun BerandaScreen(bukaLayarAlias: () -> Unit) {
     }
     val peluncur = remember { PeluncurAplikasi(context) }
     val repositori = remember { RepositoriAlias(context) }
+    val pengaturan = remember { Pengaturan(context) }
+    val klien = remember { KlienModel(pengaturan) }
+    val pembicara = remember { Pembicara(context) }
     var pengenal by remember { mutableStateOf<PengenalSuara?>(null) }
+
+    DisposableEffect(Unit) {
+        onDispose { pembicara.tutup() }
+    }
 
     val izinLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
@@ -71,7 +89,6 @@ fun BerandaScreen(bukaLayarAlias: () -> Unit) {
             status = "Tidak terdengar, coba lagi"
             return
         }
-        // 1. Cocokkan dengan alias dulu sesuai spesifikasi 02.
         scope.launch {
             val aksiCocok = repositori.aksiUntukAlias(bersih)
             when {
@@ -87,15 +104,28 @@ fun BerandaScreen(bukaLayarAlias: () -> Unit) {
                     status = "Ada beberapa yang mirip: " + aksiCocok.joinToString(", ") + ". Mana yang dimaksud?"
                 }
                 else -> {
-                    // 2. Tidak ada alias yang cocok, coba nama aplikasi.
                     val daftar = peluncur.daftarAplikasi()
                     val cocok = PencocokNama.cariCocok(bersih, daftar.map { it.label })
                     when (cocok.size) {
-                        0 -> status = "Aplikasi tidak ditemukan"
                         1 -> {
                             val app = daftar.first { it.label == cocok[0] }
                             if (peluncur.buka(app)) status = "Membuka " + app.label
                             else status = "Aplikasi tidak ditemukan"
+                        }
+                        0 -> {
+                            // Tidak cocok perintah apa pun: tanya ke model sesuai spesifikasi 03.
+                            status = "Berpikir"
+                            jawaban = ""
+                            when (val hasil = klien.tanya(bersih)) {
+                                is KlienModel.Hasil.Sukses -> {
+                                    jawaban = hasil.jawaban
+                                    status = "Jawaban Nazeio"
+                                    pembicara.bicara(Pembicara.ringkasUntukBaca(hasil.jawaban))
+                                }
+                                is KlienModel.Hasil.Gagal -> {
+                                    status = hasil.pesan
+                                }
+                            }
                         }
                         else -> status = "Ada beberapa yang mirip: " + cocok.joinToString(", ") + ". Mana yang dimaksud?"
                     }
@@ -109,6 +139,7 @@ fun BerandaScreen(bukaLayarAlias: () -> Unit) {
             izinLauncher.launch(Manifest.permission.RECORD_AUDIO)
             return
         }
+        pembicara.hentikan()
         scope.launch { repositori.pastikanDataAwal() }
         pengenal = PengenalSuara(
             context = context,
@@ -134,7 +165,8 @@ fun BerandaScreen(bukaLayarAlias: () -> Unit) {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(24.dp),
+            .padding(24.dp)
+            .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
@@ -160,6 +192,7 @@ fun BerandaScreen(bukaLayarAlias: () -> Unit) {
                 .clickableTanpaRiak {
                     if (mendengar) {
                         pengenal?.berhenti()
+                        pembicara.hentikan()
                         mendengar = false
                         status = "Dibatalkan"
                     } else {
@@ -182,13 +215,31 @@ fun BerandaScreen(bukaLayarAlias: () -> Unit) {
             modifier = Modifier.padding(top = 32.dp)
         )
 
-        Text(
-            text = "Layar alias",
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier
-                .padding(top = 24.dp)
-                .clickableTanpaRiak { bukaLayarAlias() }
-        )
+        if (jawaban.isNotEmpty()) {
+            Text(
+                text = jawaban,
+                fontSize = 13.sp,
+                textAlign = TextAlign.Start,
+                modifier = Modifier
+                    .padding(top = 16.dp)
+                    .fillMaxSize()
+            )
+        }
+
+        Row(modifier = Modifier.padding(top = 24.dp)) {
+            TextButton(onClick = bukaLayarAlias) { Text("Alias") }
+            TextButton(onClick = bukaLayarPengaturan) { Text("Pengaturan") }
+            if (pembicara.sedangBicara) {
+                TextButton(onClick = { pembicara.hentikan() }) { Text("Hentikan suara") }
+            }
+        }
+
+        if (pengaturan.pemakaianHampirHabis) {
+            Text(
+                text = "Batas harian hampir tercapai.",
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
     }
 }

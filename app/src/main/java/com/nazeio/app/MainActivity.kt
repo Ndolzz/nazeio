@@ -12,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.graphics.Color
 import com.nazeio.app.ui.AliasScreen
 import com.nazeio.app.ui.BerandaScreen
+import com.nazeio.app.ui.PengaturanScreen
 
 class MainActivity : ComponentActivity() {
 
@@ -21,8 +22,12 @@ class MainActivity : ComponentActivity() {
             NazeioTheme {
                 var layar by remember { mutableStateOf("beranda") }
                 when (layar) {
-                    "beranda" -> BerandaScreen(bukaLayarAlias = { layar = "alias" })
+                    "beranda" -> BerandaScreen(
+                        bukaLayarAlias = { layar = "alias" },
+                        bukaLayarPengaturan = { layar = "pengaturan" }
+                    )
                     "alias" -> AliasScreen(kembali = { layar = "beranda" })
+                    "pengaturan" -> PengaturanScreen(kembali = { layar = "beranda" })
                 }
             }
         }

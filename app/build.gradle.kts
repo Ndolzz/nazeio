@@ -13,8 +13,8 @@ android {
         applicationId = "com.nazeio.app"
         minSdk = 30
         targetSdk = 35
-        versionCode = 2
-        versionName = "0.2.0"
+        versionCode = 3
+        versionName = "0.3.0"
 
         // Spesifikasi induk: target HP ARMv7 32 bit.
         ndk {
@@ -77,6 +77,9 @@ dependencies {
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
     ksp("androidx.room:room-compiler:2.6.1")
+
+    // Penyimpanan kunci API terenkripsi sesuai spesifikasi 03
+    implementation("androidx.security:security-crypto:1.1.0-alpha06")
 
     testImplementation("junit:junit:4.13.2")
 }
