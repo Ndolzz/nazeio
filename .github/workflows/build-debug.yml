@@ -56,17 +56,25 @@ jobs:
           RUN_URL: https://github.com/Ndolzz/nazeio/actions/runs/${{ github.run_id }}
         run: |
           JUDUL="Build debug APK gagal"
-          NOMOR=$(gh issue list --state open --limit 50 --json number,title --jq '.[] | select(.title == "Build debug APK gagal") | .number' | head -n 1)
+          NOMUR=$(gh issue list --state open --limit 50 --json number,title --jq '.[] | select(.title == "Build debug APK gagal") | .number' | head -n 1)
           SHA_PENDEK=${GITHUB_SHA:0:7}
+          grep -nE "^e: |error: |Caused by" build-log.txt | head -n 60 > galat.txt || true
           {
             echo "Build gagal pada commit $SHA_PENDEK."
             echo
             echo "Log run: $RUN_URL"
             echo
-            echo "Potongan log akhir:"
+            echo "Baris error:"
             echo
             echo '~~~'
-            tail -n 150 build-log.txt
+            cat galat.txt
+            echo '~~~'
+            echo
+            echo "Bagian log sebelum kegagalan:"
+            echo
+            echo '~~~'
+            grep -n "FAILURE" build-log.txt | head -n 1 > pos.txt || true
+            sed -n "$(grep -n "FAILURE" build-log.txt | head -n 1 | cut -d: -f1),$p" build-log.txt | head -n 120
             echo '~~~'
           } > isi-issue.txt
           if [ -n "$NOMUR" ] && [ "$NOMUR" != "" ]; then
