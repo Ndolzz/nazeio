@@ -31,6 +31,19 @@ class PemrosesPerintah(private val context: Context) {
             return Hasil.Selesai("Sampai jumpa")
         }
 
+        // Pertanyaan lokal tanpa internet: jam dan baterai.
+        if (bersih == "jam berapa" || bersih == "pukul berapa" || bersih == "jam sekarang") {
+            val jam = java.text.SimpleDateFormat("HH:mm", java.util.Locale("id", "ID"))
+                .format(java.util.Date())
+            return Hasil.Selesai("Sekarang jam " + jam)
+        }
+        if (bersih.contains("baterai") && bersih.contains("berapa")) {
+            val bm = context.getSystemService(android.os.BatteryManager::class.java)
+            val persen = bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
+            return if (persen >= 0) Hasil.Selesai("Baterai " + persen + " persen")
+            else Hasil.Bicara("Level baterai tidak bisa dibaca")
+        }
+
         // Cari di YouTube.
         if (bersih.contains("youtube") && bersih.contains("cari")) {
             val query = bersih
@@ -110,7 +123,10 @@ class PemrosesPerintah(private val context: Context) {
         listOf(
             "tolong berikan jawaban", "berikan jawaban", "tolong carikan tentang",
             "carikan tentang", "tolong carikan", "carikan", "apa itu", "tolong"
-        ).forEach { hasil = hasil.replace(it, "") }
+        ).forEach { frasa ->
+            // Buang hanya frasa utuh agar kata seperti siapa tidak ikut rusak.
+            hasil = hasil.replace(Regex("\\b" + Regex.escape(frasa) + "\\b"), "")
+        }
         return hasil.trim()
     }
 

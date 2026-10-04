@@ -45,14 +45,17 @@ class KlienModel(private val pengaturan: Pengaturan) {
 
     private fun tanyaGemini(kunci: String, pertanyaan: String): String {
         val url = URL(
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=" + kunci
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent"
         )
         val isi = JSONObject().put("contents", org.json.JSONArray().put(
             JSONObject().put("parts", org.json.JSONArray().put(
                 JSONObject().put("text", INSTRUKSI + pertanyaan)
             ))
         ))
-        val respon = kirim(url, "POST", isi.toString())
+        val respon = kirim(
+            url, "POST", isi.toString(),
+            tambahan = mapOf("x-goog-api-key" to kunci)
+        )
         val teks = respon
             .getJSONArray("candidates")
             .getJSONObject(0)

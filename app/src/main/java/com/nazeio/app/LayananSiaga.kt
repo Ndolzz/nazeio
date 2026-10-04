@@ -177,6 +177,7 @@ class LayananSiaga : Service() {
 
     private fun mulaiPercakapan(sapaan: String?) {
         percakapan = true
+        galatBerturut = 0
         StatusBersama.set(this, Status.AKTIF)
         PembaruWidget.penuh(this)
         PembaruWidget.ucapan(this, "Silakan bicara")

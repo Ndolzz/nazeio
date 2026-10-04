@@ -38,7 +38,13 @@ class Pengaturan(context: Context) {
 
     var pemakaianHari: Int
         get() = biasa.getInt("pemakaian_" + hariIni(), 0)
-        set(nilai) { biasa.edit().putInt("pemakaian_" + hariIni(), nilai).apply() }
+        set(nilai) {
+            val kunciHari = "pemakaian_" + hariIni()
+            biasa.edit().putInt(kunciHari, nilai).apply()
+            // Buang catatan hari sebelumnya supaya tidak menumpuk selamanya.
+            biasa.all.keys.filter { it.startsWith("pemakaian_") && it != kunciHari }
+                .forEach { biasa.edit().remove(it).apply() }
+        }
 
     val pemakaianHampirHabis: Boolean
         get() = pemakaianHari >= batasHarian * 4 / 5 && pemakaianHari < batasHarian
