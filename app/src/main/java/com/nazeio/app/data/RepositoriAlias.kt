@@ -1,6 +1,7 @@
 package com.nazeio.app.data
 
 import android.content.Context
+import kotlinx.coroutines.flow.first
 
 /**
  * Repositori alias sesuai spesifikasi 02.
@@ -17,8 +18,7 @@ class RepositoriAlias(private val context: Context) {
         }
     }
 
-    suspend fun semua(): List<AliasEntity> =
-        kotlinx.coroutines.flow.first(dao.semua())
+    suspend fun semua(): List<AliasEntity> = dao.semua().first()
 
     suspend fun tambahAlias(aksi: String, alias: String) {
         dao.tambah(AliasEntity(aksi = aksi, alias = alias.lowercase().trim()))
@@ -28,10 +28,7 @@ class RepositoriAlias(private val context: Context) {
 
     suspend fun aksiUntukAlias(teks: String): List<String> {
         val semuaAlias = semua()
-        val cocok = PencocokAplikasi.cariCocok(
-            teks,
-            semuaAlias.map { it.alias }
-        )
+        val cocok = PencocokNama.cariCocok(teks, semuaAlias.map { it.alias })
         return semuaAlias.filter { it.alias in cocok }.map { it.aksi }.distinct()
     }
 
