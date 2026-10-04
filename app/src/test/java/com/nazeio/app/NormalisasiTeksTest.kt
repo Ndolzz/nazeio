@@ -1,7 +1,6 @@
 package com.nazeio.app
 
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class NormalisasiTeksTest {
@@ -14,8 +13,14 @@ class NormalisasiTeksTest {
     }
 
     @Test
+    fun hanyaKataPengantarMenjadiKosong() {
+        assertEquals("", NormalisasiTeks.normalisasi("  BUKA  "))
+        assertEquals("", NormalisasiTeks.normalisasi("tolong nazeio"))
+    }
+
+    @Test
     fun hurufKecilDanTanpaTandaBaca() {
         assertEquals("wa", NormalisasiTeks.normalisasi("WA."))
-        assertEquals("buka", NormalisasiTeks.normalisasi("  BUKA  "))
+        assertEquals("whatsapp web", NormalisasiTeks.normalisasi("WhatsApp-Web"))
     }
 }

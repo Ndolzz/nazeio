@@ -21,6 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -68,25 +69,32 @@ fun BerandaScreen() {
             context = context,
             padaHasil = { teks ->
                 mendengar = false
-                val t = teks ?: run {
+                val t = teks
+                if (t.isNullOrBlank()) {
                     status = "Tidak terdengar, coba lagi"
-                    return@PengenalSuara
-                }
-                val bersih = NormalisasiTeks.normalisasi(t)
-                if (bersih.isBlank()) {
-                    status = "Tidak terdengar, coba lagi"
-                    return@PengenalSuara
-                }
-                val label = daftar.map { it.label }
-                val cocok = PencocokNama.cariCocok(bersih, label)
-                when {
-                    cocok.isEmpty() -> status = "Aplikasi tidak ditemukan"
-                    cocok.size == 1 -> {
-                        val app = daftar.first { it.label == cocok[0] }
-                        if (peluncur.buka(app)) status = "Membuka " + app.label
-                        else status = "Aplikasi tidak ditemukan"
+                } else {
+                    val bersih = NormalisasiTeks.normalisasi(t)
+                    if (bersih.isBlank()) {
+                        status = "Tidak terdengar, coba lagi"
+                    } else {
+                        val label = daftar.map { it.label }
+                        val cocok = PencocokNama.cariCocok(bersih, label)
+                        when (cocok.size) {
+                            0 -> status = "Aplikasi tidak ditemukan"
+                            1 -> {
+                                val app = daftar.first { it.label == cocok[0] }
+                                if (peluncur.buka(app)) {
+                                    status = "Membuka " + app.label
+                                } else {
+                                    status = "Aplikasi tidak ditemukan"
+                                }
+                            }
+                            else -> {
+                                status = "Ada beberapa yang mirip: " +
+                                    cocok.joinToString(", ") + ". Mana yang dimaksud?"
+                            }
+                        }
                     }
-                    else -> status = "Ada beberapa yang mirip: " + cocok.joinToString(", ") + ". Mana yang dimaksud?"
                 }
             },
             padaGalat = { pesan ->
@@ -126,7 +134,15 @@ fun BerandaScreen() {
                     if (mendengar) Color(0xFF7C3AED) else Color(0xFF2563EB),
                     CircleShape
                 )
-                .clickableTanpaRiak { if (mendengar) pengenal?.berhenti(); else mulaiMendengar() },
+                .clickableTanpaRiak {
+                    if (mendengar) {
+                        pengenal?.berhenti()
+                        mendengar = false
+                        status = "Dibatalkan"
+                    } else {
+                        mulaiMendengar()
+                    }
+                },
             contentAlignment = Alignment.Center
         ) {
             Text(
