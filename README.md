@@ -16,6 +16,7 @@ Nazeio adalah asisten suara pribadi untuk Android. Aplikasi mendengarkan kata pe
 10. Riwayat perintah tersimpan permanen, dimuat kembali saat aplikasi dibuka, dan bisa dikosongkan dengan tombol hapus semua.
 11. Kontrol Bluetooth lewat suara: nyalakan bluetooth, matikan bluetooth, dan tanya status.
 12. Tangkap layar lewat perintah suara setelah layanan aksesibilitas Nazeio dinyalakan satu kali di pengaturan.
+13. Maps lewat suara: buka maps, cari X di maps, dan arah ke X membuka navigasi.
 
 ## Batasan
 
@@ -53,6 +54,7 @@ Butuh JDK 17.
 12. 12_layar_pengingat.md
 13. 13_bluetooth.md
 14. 14_tangkap_layar.md
+15. 15_maps.md
 
 ## Lisensi
 

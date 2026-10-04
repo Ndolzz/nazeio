@@ -10,7 +10,7 @@ import com.nazeio.app.data.RepositoriAlias
  * Memproses satu perintah ucapan menjadi aksi nyata.
  * Dipakai oleh layanan siaga dan layar Beranda.
  * Menangani: buka aplikasi, kirim chat WhatsApp, cari YouTube, cari Google,
- * telepon, pengingat, Bluetooth, tangkap layar, tanya AI.
+ * maps, telepon, pengingat, Bluetooth, tangkap layar, tanya AI.
  */
 class PemrosesPerintah(private val context: Context) {
 
@@ -76,6 +76,45 @@ class PemrosesPerintah(private val context: Context) {
             val persen = bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
             return if (persen >= 0) Hasil.Selesai("Baterai " + persen + " persen")
             else Hasil.Bicara("Level baterai tidak bisa dibaca")
+        }
+
+        // Maps sesuai spesifikasi 15.
+        if (bersih.contains("maps") || bersih.contains("peta")) {
+            val mauRute = bersih.contains("ke ") || bersih.contains("arah")
+            val tujuan = bersih
+                .replace("buka maps", "")
+                .replace("buka peta", "")
+                .replace("cari lokasi di maps", "")
+                .replace("cari lokasi", "")
+                .replace("carikan lokasi", "")
+                .replace("arah ke", "")
+                .replace("rute ke", "")
+                .replace("menuju ke", "")
+                .replace("menuju", "")
+                .replace("cari di maps", "")
+                .replace("carikan di maps", "")
+                .replace("cari", "")
+                .replace("carikan", "")
+                .replace("lokasi", "")
+                .replace("maps", "")
+                .replace("peta", "")
+                .replace("tolong", "")
+                .replace("di", "")
+                .replace("ke", "")
+                .trim()
+            if (tujuan.isBlank()) {
+                return if (bukaMaps(context)) Hasil.Selesai("Membuka Maps")
+                else Hasil.Bicara("Maps tidak bisa dibuka")
+            }
+            val sukses = if (mauRute) bukaRute(context, tujuan) else cariLokasi(context, tujuan)
+            return if (sukses) {
+                Hasil.Selesai(
+                    if (mauRute) "Membuka rute ke " + tujuan
+                    else "Mencari lokasi " + tujuan
+                )
+            } else {
+                Hasil.Bicara("Maps tidak bisa dibuka")
+            }
         }
 
         // Kontrol Bluetooth sesuai spesifikasi 13.
@@ -306,6 +345,7 @@ class PemrosesPerintah(private val context: Context) {
     }
 
     companion object {
+
         fun bukaAplikasiAi(context: Context): Boolean {
             val peluncur = PeluncurAplikasi(context)
             val target = peluncur.daftarAplikasi().firstOrNull {
@@ -313,6 +353,51 @@ class PemrosesPerintah(private val context: Context) {
                     it.label.contains("GPT", true)
             }
             return target != null && peluncur.buka(target)
+        }
+
+        /** Membuka aplikasi Maps sesuai spesifikasi 15. */
+        fun bukaMaps(context: Context): Boolean {
+            return try {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.google.com/maps")
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        /** Mencari lokasi di Maps sesuai spesifikasi 15. */
+        fun cariLokasi(context: Context, tujuan: String): Boolean {
+            return try {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.google.com/maps/search/?api=1&query=" + Uri.encode(tujuan))
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        /** Membuka rute ke lokasi di Maps sesuai spesifikasi 15. */
+        fun bukaRute(context: Context, tujuan: String): Boolean {
+            return try {
+                context.startActivity(
+                    Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("https://www.google.com/maps/dir/?api=1&destination=" + Uri.encode(tujuan))
+                    ).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                )
+                true
+            } catch (e: Exception) {
+                false
+            }
         }
     }
 }
