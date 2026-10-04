@@ -1,20 +1,26 @@
 package com.nazeio.app.ui
 
 import android.Manifest
+import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.os.Build
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -35,6 +41,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.nazeio.app.AksiPengaturan
 import com.nazeio.app.KlienModel
+import com.nazeio.app.LayananSiaga
 import com.nazeio.app.NormalisasiTeks
 import com.nazeio.app.PeluncurAplikasi
 import com.nazeio.app.Pembicara
@@ -45,8 +52,8 @@ import com.nazeio.app.data.RepositoriAlias
 import kotlinx.coroutines.launch
 
 /**
- * Layar Beranda sesuai spesifikasi 01, 02, dan 03.
- * Ucapan dicocokkan dengan alias, lalu aplikasi, lalu model bahasa.
+ * Layar Beranda: tombol mikrofon, sakelar mode siaga, dan status.
+ * Sesuai spesifikasi 01, 02, 03, dan 05.
  */
 @Composable
 fun BerandaScreen(
@@ -58,6 +65,7 @@ fun BerandaScreen(
     var status by remember { mutableStateOf("Tekan mikrofon lalu bicara") }
     var jawaban by remember { mutableStateOf("") }
     var mendengar by remember { mutableStateOf(false) }
+    var siaga by remember { mutableStateOf(false) }
     var adaIzin by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -77,10 +85,10 @@ fun BerandaScreen(
     }
 
     val izinLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestPermission()
-    ) { diberikan ->
-        adaIzin = diberikan
-        if (!diberikan) status = "Izin mikrofon dibutuhkan untuk mendengar perintah"
+        ActivityResultContracts.RequestMultiplePermissions()
+    ) { hasil ->
+        adaIzin = hasil[Manifest.permission.RECORD_AUDIO] == true
+        if (adaIzin && siaga) nyalakanSiaga(context)
     }
 
     fun prosesTeks(t: String) {
@@ -101,7 +109,7 @@ fun BerandaScreen(
                     }
                 }
                 aksiCocok.size > 1 -> {
-                    status = "Ada beberapa yang mirip: " + aksiCocok.joinToString(", ") + ". Mana yang dimaksud?"
+                    status = "Ada beberapa yang mirip. Mana yang dimaksud?"
                 }
                 else -> {
                     val daftar = peluncur.daftarAplikasi()
@@ -113,7 +121,6 @@ fun BerandaScreen(
                             else status = "Aplikasi tidak ditemukan"
                         }
                         0 -> {
-                            // Tidak cocok perintah apa pun: tanya ke model sesuai spesifikasi 03.
                             status = "Berpikir"
                             jawaban = ""
                             when (val hasil = klien.tanya(bersih)) {
@@ -122,12 +129,10 @@ fun BerandaScreen(
                                     status = "Jawaban Nazeio"
                                     pembicara.bicara(Pembicara.ringkasUntukBaca(hasil.jawaban))
                                 }
-                                is KlienModel.Hasil.Gagal -> {
-                                    status = hasil.pesan
-                                }
+                                is KlienModel.Hasil.Gagal -> status = hasil.pesan
                             }
                         }
-                        else -> status = "Ada beberapa yang mirip: " + cocok.joinToString(", ") + ". Mana yang dimaksud?"
+                        else -> status = "Ada beberapa yang mirip. Mana yang dimaksud?"
                     }
                 }
             }
@@ -136,7 +141,12 @@ fun BerandaScreen(
 
     fun mulaiMendengar() {
         if (!adaIzin) {
-            izinLauncher.launch(Manifest.permission.RECORD_AUDIO)
+            izinLauncher.launch(
+                arrayOf(
+                    Manifest.permission.RECORD_AUDIO,
+                    Manifest.permission.POST_NOTIFICATIONS
+                )
+            )
             return
         }
         pembicara.hentikan()
@@ -170,11 +180,7 @@ fun BerandaScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Text(
-            text = "Nazeio",
-            fontSize = 28.sp,
-            fontWeight = FontWeight.Bold
-        )
+        Text(text = "Nazeio", fontSize = 28.sp, fontWeight = FontWeight.Bold)
         Text(
             text = "Asisten suara pribadi",
             fontSize = 14.sp,
@@ -219,14 +225,46 @@ fun BerandaScreen(
             Text(
                 text = jawaban,
                 fontSize = 13.sp,
-                textAlign = TextAlign.Start,
                 modifier = Modifier
                     .padding(top = 16.dp)
-                    .fillMaxSize()
+                    .fillMaxWidth()
             )
         }
 
-        Row(modifier = Modifier.padding(top = 24.dp)) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 24.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = "Mode siaga: katakan Nazeio kapan saja",
+                fontSize = 13.sp,
+                modifier = Modifier.weight(1f)
+            )
+            Switch(
+                checked = siaga,
+                onCheckedChange = { nyala ->
+                    siaga = nyala
+                    if (nyala) {
+                        if (!adaIzin) {
+                            izinLauncher.launch(
+                                arrayOf(
+                                    Manifest.permission.RECORD_AUDIO,
+                                    Manifest.permission.POST_NOTIFICATIONS
+                                )
+                            )
+                        } else {
+                            nyalakanSiaga(context)
+                        }
+                    } else {
+                        context.stopService(Intent(context, LayananSiaga::class.java))
+                    }
+                }
+            )
+        }
+
+        Row(modifier = Modifier.padding(top = 16.dp)) {
             TextButton(onClick = bukaLayarAlias) { Text("Alias") }
             TextButton(onClick = bukaLayarPengaturan) { Text("Pengaturan") }
             if (pembicara.sedangBicara) {
@@ -242,4 +280,9 @@ fun BerandaScreen(
             )
         }
     }
+}
+
+private fun nyalakanSiaga(context: Context) {
+    val niat = Intent(context, LayananSiaga::class.java)
+    context.startForegroundService(niat)
 }
