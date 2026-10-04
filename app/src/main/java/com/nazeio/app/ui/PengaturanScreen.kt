@@ -41,7 +41,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.draw.rotate as putar
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
@@ -63,8 +63,7 @@ import kotlin.math.sin
  * pratinjau gaya animasi, Siaga, Suara, Izin, dan API.
  *
  * Catatan: drawscope.rotate dipakai di dalam Canvas,
- * sedangkan Modifier.rotate (impor di atas) untuk memutar
- * seluruh badan kipas.
+ * sedangkan putar (Modifier.rotate) memutar badan kipas.
  */
 @Composable
 fun PengaturanScreen() {
@@ -332,7 +331,7 @@ private fun PratinjauAnimasi(
 /**
  * Badan animasi sesuai gaya: gelombang batang, kipas berputar,
  * atau lingkaran badai. rotate di dalam Canvas berasal dari
- * drawscope, sedangkan Modifier.rotate memutar seluruh kipas.
+ * drawscope, sedangkan putar (Modifier.rotate) memutar kipas.
  */
 @Composable
 private fun BadanAnimasi(gaya: String, hemat: Boolean, modifier: Modifier = Modifier) {
@@ -349,7 +348,7 @@ private fun BadanAnimasi(gaya: String, hemat: Boolean, modifier: Modifier = Modi
             Canvas(
                 modifier = modifier
                     .size(48.dp)
-                    .rotate(if (hemat) fase * 60f else fase * 360f)
+                    .putar(if (hemat) fase * 60f else fase * 360f)
             ) {
                 val lebar = size.minDimension
                 repeat(3) { i ->
