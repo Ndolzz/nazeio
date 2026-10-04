@@ -51,34 +51,26 @@ jobs:
 
       - name: Laporkan error ke issue
         if: failure()
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
           RUN_URL: https://github.com/Ndolzz/nazeio/actions/runs/${{ github.run_id }}
         run: |
-          JUDUL="Build debug APK gagal"
+          set +e
+          echo "Build gagal pada commit ${GITHUB_SHA:0:7}." > isi-issue.txt
+          echo "" >> isi-issue.txt
+          echo "Log run: ${RUN_URL}" >> isi-issue.txt
+          echo "" >> isi-issue.txt
+          echo "Baris error:" >> isi-issue.txt
+          echo "" >> isi-issue.txt
+          grep -E "^e: |error: |FAILURE|Caused by" build-log.txt | head -n 80 >> isi-issue.txt
+          echo "" >> isi-issue.txt
+          echo "Potongan log akhir:" >> isi-issue.txt
+          echo "" >> isi-issue.txt
+          tail -n 100 build-log.txt >> isi-issue.txt
           NOMUR=$(gh issue list --state open --limit 50 --json number,title --jq '.[] | select(.title == "Build debug APK gagal") | .number' | head -n 1)
-          SHA_PENDEK=${GITHUB_SHA:0:7}
-          grep -nE "^e: |error: |Caused by" build-log.txt | head -n 60 > galat.txt || true
-          {
-            echo "Build gagal pada commit $SHA_PENDEK."
-            echo
-            echo "Log run: $RUN_URL"
-            echo
-            echo "Baris error:"
-            echo
-            echo '~~~'
-            cat galat.txt
-            echo '~~~'
-            echo
-            echo "Bagian log sebelum kegagalan:"
-            echo
-            echo '~~~'
-            grep -n "FAILURE" build-log.txt | head -n 1 > pos.txt || true
-            sed -n "$(grep -n "FAILURE" build-log.txt | head -n 1 | cut -d: -f1),$p" build-log.txt | head -n 120
-            echo '~~~'
-          } > isi-issue.txt
-          if [ -n "$NOMUR" ] && [ "$NOMUR" != "" ]; then
+          if [ -n "$NOMUR" ]; then
             gh issue comment "$NOMUR" --body-file isi-issue.txt
           else
-            gh issue create --title "$JUDUL" --body-file isi-issue.txt
+            gh issue create --title "Build debug APK gagal" --body-file isi-issue.txt
           fi
