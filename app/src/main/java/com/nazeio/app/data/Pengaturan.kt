@@ -43,6 +43,14 @@ class Pengaturan(context: Context) {
     val pemakaianHampirHabis: Boolean
         get() = pemakaianHari >= batasHarian * 4 / 5 && pemakaianHari < batasHarian
 
+    var gayaAnimasi: String
+        get() = biasa.getString("gaya_animasi", "gelombang") ?: "gelombang"
+        set(nilai) { biasa.edit().putString("gaya_animasi", nilai).apply() }
+
+    var hematBaterai: Boolean
+        get() = biasa.getBoolean("hemat_baterai", false)
+        set(nilai) { biasa.edit().putBoolean("hemat_baterai", nilai).apply() }
+
     private fun hariIni(): String =
         android.text.format.DateFormat.format("yyyyMMdd", java.util.Date()).toString()
 }

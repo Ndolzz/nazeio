@@ -13,8 +13,8 @@ android {
         applicationId = "com.nazeio.app"
         minSdk = 30
         targetSdk = 35
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
 
         // Spesifikasi induk: target HP ARMv7 32 bit.
         ndk {
@@ -71,6 +71,7 @@ dependencies {
     implementation("androidx.compose.ui:ui-graphics")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
+    implementation("androidx.compose.material:material-icons-extended")
     debugImplementation("androidx.compose.ui:ui-tooling")
 
     // Room untuk penyimpanan alias sesuai spesifikasi 02

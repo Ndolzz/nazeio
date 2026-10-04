@@ -3,45 +3,50 @@ package com.nazeio.app
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.Modifier
 import com.nazeio.app.ui.AliasScreen
 import com.nazeio.app.ui.BerandaScreen
+import com.nazeio.app.ui.NavigasiBawah
+import com.nazeio.app.ui.NazeioTheme
 import com.nazeio.app.ui.PengaturanScreen
+import com.nazeio.app.ui.RiwayatScreen
 
+/**
+ * Aktivitas utama: empat tab bawah sesuai desain
+ * (Beranda, Riwayat, Alias, Pengaturan).
+ */
 class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             NazeioTheme {
-                var layar by remember { mutableStateOf("beranda") }
-                when (layar) {
-                    "beranda" -> BerandaScreen(
-                        bukaLayarAlias = { layar = "alias" },
-                        bukaLayarPengaturan = { layar = "pengaturan" }
-                    )
-                    "alias" -> AliasScreen(kembali = { layar = "beranda" })
-                    "pengaturan" -> PengaturanScreen(kembali = { layar = "beranda" })
+                var tab by remember { mutableIntStateOf(0) }
+                Scaffold(
+                    bottomBar = { NavigasiBawah(terpilih = tab, pilih = { tab = it }) }
+                ) { dalam ->
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(dalam)
+                    ) {
+                        when (tab) {
+                            0 -> BerandaScreen()
+                            1 -> RiwayatScreen()
+                            2 -> AliasScreen()
+                            else -> PengaturanScreen()
+                        }
+                    }
                 }
             }
         }
     }
-}
-
-@Composable
-fun NazeioTheme(content: @Composable () -> Unit) {
-    MaterialTheme(
-        colorScheme = MaterialTheme.colorScheme.copy(
-            primary = Color(0xFF2563EB),
-            secondary = Color(0xFF7C3AED),
-            error = Color(0xFFDC2626)
-        ),
-        content = content
-    )
 }
