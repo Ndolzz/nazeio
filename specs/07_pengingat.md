@@ -11,6 +11,7 @@ Pengguna memasang pengingat dengan suara, misalnya "ingatkan aku lima menit lagi
 5. Waktu yang sudah lewat digeser ke hari berikutnya.
 6. Pengingat dicatat di database Room dan dipasang ulang otomatis setelah HP dinyalakan kembali.
 7. Baris pengingat dihapus dari database setelah notifikasinya tampil.
+8. Pengingat aktif bisa dilihat dan dihapus dari layar Pengingat sesuai spesifikasi 12. Menghapus dari layar juga membatalkan alarmnya.
 
 ## Batasan
 1. Tanpa izin alarm presisi, waktu bisa melesat beberapa menit di mode hemat baterai.
@@ -21,10 +22,10 @@ Pengguna memasang pengingat dengan suara, misalnya "ingatkan aku lima menit lagi
 ## Di luar cakupan
 1. Pengingat berulang.
 2. Pengingat berbasis lokasi.
-3. Daftar pengingat yang bisa dilihat dan dihapus di layar aplikasi.
 
 ## Kriteria selesai
 1. "Ingatkan aku lima menit lagi" menampilkan notifikasi paling lama enam menit kemudian.
 2. Waktu yang tidak dikenali meminta klarifikasi tanpa memasang pengingat.
 3. Tes unit untuk pembacaan waktu lulus di CI.
 4. Pengingat yang dipasang sebelum HP dimatikan tetap berbunyi setelah HP dinyalakan kembali.
+5. Pengingat yang dihapus dari layar tidak berbunyi lagi pada waktunya.
