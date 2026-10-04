@@ -8,14 +8,14 @@ object NormalisasiTeks {
 
     private val KATA_PENGANTAR = setOf(
         "tolong", "buka", "bukakan", "bukan", "aplikasi", "nazeio", "coba",
-        "mohon", "dong", "please", "buka", "buat"
+        "mohon", "dong", "please", "buat"
     )
 
     fun normalisasi(teks: String): String {
         val bersih = teks.lowercase()
-            .replace(Regex("[^a-z0-9\s]"), " ")
+            .replace(Regex("[^a-z0-9 ]"), " ")
             .trim()
-        return bersih.split(Regex("\s+"))
+        return bersih.split(Regex(" +"))
             .filter { it.isNotBlank() && it !in KATA_PENGANTAR }
             .joinToString(" ")
     }
