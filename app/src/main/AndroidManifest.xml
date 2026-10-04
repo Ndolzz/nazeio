@@ -38,6 +38,10 @@
             android:foregroundServiceType="microphone" />
 
         <receiver
+            android:name=".PenerimaPengingat"
+            android:exported="false" />
+
+        <receiver
             android:name=".widget.WidgetKecil"
             android:exported="true">
             <intent-filter>

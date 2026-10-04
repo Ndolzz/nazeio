@@ -33,10 +33,10 @@ jobs:
           fi
           chmod +x ./gradlew
 
-      - name: Build debug APK
+      - name: Uji unit dan build debug APK
         run: |
           set +e
-          ./gradlew assembleDebug --stacktrace > build-log.txt 2>&1
+          ./gradlew testDebugUnitTest assembleDebug --stacktrace > build-log.txt 2>&1
           kode=$?
           tail -n 60 build-log.txt
           exit $kode

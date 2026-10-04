@@ -46,14 +46,21 @@ object PencocokNama {
     }
 
     /**
-     * Mengembalikan nama terbaik dari kandidat yang cocok dengan ambang tertentu.
+     * Mengembalikan kandidat terbaik beserta skornya.
      * Hasil kosong berarti tidak ada yang cocok.
      */
-    fun cariCocok(teks: String, kandidat: List<String>, ambang: Double = 0.75): List<String> {
+    fun cariSkor(teks: String, kandidat: List<String>, ambang: Double = 0.75): List<Pair<String, Double>> {
         val skor = kandidat.map { it to jaroWinkler(teks, it.lowercase()) }
             .filter { it.second >= ambang }
             .sortedByDescending { it.second }
         val terbaik = skor.firstOrNull()?.second ?: return emptyList()
-        return skor.filter { it.second >= terbaik - 0.02 }.map { it.first }
+        return skor.filter { it.second >= terbaik - 0.02 }
     }
+
+    /**
+     * Mengembalikan nama terbaik dari kandidat yang cocok dengan ambang tertentu.
+     * Hasil kosong berarti tidak ada yang cocok.
+     */
+    fun cariCocok(teks: String, kandidat: List<String>, ambang: Double = 0.75): List<String> =
+        cariSkor(teks, kandidat, ambang).map { it.first }
 }

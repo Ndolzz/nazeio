@@ -18,6 +18,9 @@ class PemrosesPerintah(private val context: Context) {
     private val klien = KlienModel(pengaturan)
     private val peluncur = PeluncurAplikasi(context)
 
+    /** Nama aplikasi yang menunggu jawaban konfirmasi pengguna. */
+    private var konfirmasiTertunda: String? = null
+
     sealed class Hasil {
         data class Selesai(val pesan: String) : Hasil()
         data class Bicara(val pesan: String) : Hasil()
@@ -31,6 +34,18 @@ class PemrosesPerintah(private val context: Context) {
             return Hasil.Selesai("Sampai jumpa")
         }
 
+        // Jawaban atas konfirmasi kecocokan aplikasi yang belum yakin.
+        val tertunda = konfirmasiTertunda
+        if (tertunda != null) {
+            konfirmasiTertunda = null
+            if (bersih == "iya" || bersih == "ya" || bersih == "benar" || bersih == "buka") {
+                val app = peluncur.daftarAplikasi().firstOrNull { it.label == tertunda }
+                return if (app != null && peluncur.buka(app)) Hasil.Selesai("Membuka " + app.label)
+                else Hasil.Bicara("Aplikasi tidak ditemukan")
+            }
+            // Bukan jawaban konfirmasi, lanjut memproses ucapan baru.
+        }
+
         // Pertanyaan lokal tanpa internet: jam dan baterai.
         if (bersih == "jam berapa" || bersih == "pukul berapa" || bersih == "jam sekarang") {
             val jam = java.text.SimpleDateFormat("HH:mm", java.util.Locale("id", "ID"))
@@ -42,6 +57,14 @@ class PemrosesPerintah(private val context: Context) {
             val persen = bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
             return if (persen >= 0) Hasil.Selesai("Baterai " + persen + " persen")
             else Hasil.Bicara("Level baterai tidak bisa dibaca")
+        }
+
+        // Pengingat.
+        if (bersih.contains("ingatkan")) {
+            val waktu = PengingatWaktu.dariUcapan(bersih, System.currentTimeMillis())
+            if (waktu == null) return Hasil.Bicara("Kapan pengingatnya. Contoh, ingatkan aku lima menit lagi")
+            return if (pasangPengingat(waktu)) Hasil.Selesai("Baik, saya ingatkan")
+            else Hasil.Bicara("Pengingat gagal dipasang")
         }
 
         // Cari di YouTube.
@@ -92,14 +115,20 @@ class PemrosesPerintah(private val context: Context) {
         // Buka aplikasi.
         val daftar = peluncur.daftarAplikasi()
         val label = daftar.map { it.label }
-        val cocok = PencocokNama.cariCocok(bersih, label)
+        val cocok = PencocokNama.cariSkor(bersih, label)
         if (cocok.size == 1) {
-            val app = daftar.first { it.label == cocok[0] }
+            val (nama, skor) = cocok[0]
+            if (skor < 0.9) {
+                // Kecocokan di bawah 0,9 wajib dikonfirmasi lisan lebih dulu.
+                konfirmasiTertunda = nama
+                return Hasil.Bicara("Kamu maksud " + nama + ". Sebut iya untuk membuka")
+            }
+            val app = daftar.first { it.label == nama }
             return if (peluncur.buka(app)) Hasil.Selesai("Membuka " + app.label)
             else Hasil.Bicara("Aplikasi tidak ditemukan")
         }
         if (cocok.size > 1) {
-            return Hasil.Bicara("Ada beberapa yang mirip: " + cocok.joinToString(", "))
+            return Hasil.Bicara("Ada beberapa yang mirip: " + cocok.joinToString(", ") { it.first })
         }
 
         // Pertanyaan AI.
@@ -136,6 +165,23 @@ class PemrosesPerintah(private val context: Context) {
             context.startActivity(
                 Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
+            true
+        } catch (e: Exception) {
+            false
+        }
+    }
+
+    private fun pasangPengingat(waktu: Long): Boolean {
+        return try {
+            val am = context.getSystemService(android.app.AlarmManager::class.java) ?: return false
+            val kode = (waktu / 1000).toInt()
+            val niat = Intent(context, PenerimaPengingat::class.java)
+                .putExtra(PenerimaPengingat.EXTRA_ID, kode)
+            val pi = android.app.PendingIntent.getBroadcast(
+                context, kode, niat,
+                android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT
+            )
+            am.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, waktu, pi)
             true
         } catch (e: Exception) {
             false
