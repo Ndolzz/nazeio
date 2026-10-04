@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nazeio Desain Pengaturan</title>
+<style>
+:root{
+  --page:#EEF2F8;--screen:#FFFFFF;--card:#F8FAFC;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;
+  --blue:#2563EB;--purple:#7C3AED;--red:#DC2626;
+  --bluesoft:#EAF1FF;--purplesoft:#F2ECFF;--redsoft:#FDECEC;--frame:#0F172A;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#0A0F1E;--screen:#0F172A;--card:#162033;--text:#F1F5F9;--muted:#94A3B8;--line:#243049;
+  --bluesoft:#16284F;--purplesoft:#2A1F4D;--redsoft:#3A1A1F;--frame:#243049;}}
+:root[data-theme="dark"]{
+  --page:#0A0F1E;--screen:#0F172A;--card:#162033;--text:#F1F5F9;--muted:#94A3B8;--line:#243049;
+  --bluesoft:#16284F;--purplesoft:#2A1F4D;--redsoft:#3A1A1F;--frame:#243049;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font-family:Inter,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+.wrap{max-width:560px;margin:0 auto;padding:26px 16px 40px}
+h1{margin:0;font-size:26px}
+.lead{margin:6px 0 18px;color:var(--muted);font-size:14px}
+.phone{width:min(340px,100%);height:720px;margin:0 auto;border:8px solid var(--frame);border-radius:38px;background:var(--screen);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 40px rgba(15,23,42,.14)}
+.scr{flex:1;overflow-y:auto;padding:22px 18px 14px}
+h2{margin:0 0 2px;font-size:22px}
+.sub{margin:0;color:var(--muted);font-size:13px}
+.sec{font-size:12px;font-weight:600;color:var(--muted);letter-spacing:.4px;margin:20px 0 6px}
+.rw{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);font-size:14px}
+.rw small{display:block;color:var(--muted);font-size:12px}
+.val{color:var(--muted);font-size:13px;white-space:nowrap}
+.chip{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bluesoft);color:var(--blue);white-space:nowrap}
+.chip.r{background:var(--redsoft);color:var(--red)}
+.tg{width:44px;height:26px;flex:none;border-radius:999px;background:var(--line);position:relative;display:block;cursor:pointer;transition:background .2s}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.3);transition:left .2s}
+.tg.on{background:var(--blue)}.tg.on::after{left:21px}
+.tg:focus-visible,.opt:focus-visible,.sg button:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+
+.prev{background:linear-gradient(160deg,var(--bluesoft),var(--purplesoft));border:1px solid var(--line);border-radius:22px;padding:20px 16px 14px;display:flex;flex-direction:column;align-items:center;gap:14px;margin-top:6px}
+.sg{display:flex;gap:4px;background:var(--screen);border:1px solid var(--line);border-radius:999px;padding:3px}
+.sg button{font:inherit;font-size:12px;font-weight:600;border:0;background:none;color:var(--muted);padding:6px 14px;border-radius:999px;cursor:pointer}
+.sg button.on{background:var(--blue);color:#fff}
+.lbl{font-size:12px;color:var(--muted);margin:0}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:12px}
+.opt{font:inherit;color:var(--text);border:1.5px solid var(--line);border-radius:16px;padding:12px 4px 10px;background:var(--card);display:flex;flex-direction:column;align-items:center;gap:8px;font-size:12px;font-weight:600;cursor:pointer}
+.opt.on{border-color:var(--blue);background:var(--bluesoft)}
+.opt i{font-style:normal;font-size:10px;color:var(--blue);visibility:hidden}
+.opt.on i{visibility:visible}
+
+.w{width:156px;height:156px;background:var(--screen);border:1px solid var(--line);border-radius:26px;position:relative;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
+.nm{font-weight:700;font-size:14px;line-height:1.2}
+.st{font-size:12px;color:var(--muted)}
+.w[data-s="siaga"] .st{color:var(--blue)}.w[data-s="aktif"] .st{color:var(--purple)}
+
+.ob{--sp:.9s;display:flex}
+.ob[data-s="siaga"]{--sp:3.2s}
+.o{--d:52px;width:var(--d);height:var(--d);border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(37,99,235,.30)}
+.opt .o{--d:44px}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.mic{display:none}
+.w[data-s="mati"] .mic{display:flex}
+.w[data-s="mati"] .o{background:var(--line);color:var(--muted);box-shadow:none}
+.w[data-s="mati"] .fx{display:none!important}
+.w[data-s="aktif"] .o{background:linear-gradient(135deg,var(--purple),var(--blue))}
+.fx{display:none;width:28px;height:28px}
+.fx svg{width:100%;height:100%;display:block;overflow:visible}
+.ob[data-fx="wave"] .fx-wave,.ob[data-fx="fan"] .fx-fan,.ob[data-fx="storm"] .fx-storm{display:block}
+.fx-wave rect{fill:#fff;transform-box:fill-box;transform-origin:center;animation:eq var(--sp) ease-in-out infinite}
+.fx-wave rect:nth-child(2){animation-delay:-.3s}.fx-wave rect:nth-child(3){animation-delay:-.6s}
+.fx-wave rect:nth-child(4){animation-delay:-.2s}.fx-wave rect:nth-child(5){animation-delay:-.5s}
+@keyframes eq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fx-fan svg{animation:spin calc(var(--sp)*.8) linear infinite}
+.fx-storm circle{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;transform-box:view-box;transform-origin:50% 50%}
+.fx-storm .c1{stroke-dasharray:22 41;animation:spin calc(var(--sp)*1.1) linear infinite}
+.fx-storm .c2{stroke-dasharray:15 26;animation:spin calc(var(--sp)*.8) linear infinite reverse}
+.fx-storm .c3{stroke-dasharray:8 13;animation:spin calc(var(--sp)*.55) linear infinite}
+.fx-storm .core{fill:#fff;stroke:none}
+
+@property --ang{syntax:"<angle>";inherits:true;initial-value:0deg}
+.w::before{content:"";position:absolute;inset:-2px;border-radius:28px;padding:2px;pointer-events:none;display:none;
+  background:conic-gradient(from var(--ang),#2563EB,#A78BFA,#60A5FA,#7C3AED,#2563EB);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.w[data-s="siaga"]::before,.w[data-s="aktif"]::before{display:block}
+.w[data-s="siaga"]{box-shadow:0 0 12px rgba(37,99,235,.40),0 0 28px rgba(124,58,237,.22);animation:rot 14s linear infinite,breath 3.2s ease-in-out infinite}
+.w[data-s="aktif"]{box-shadow:0 0 16px rgba(124,58,237,.70),0 0 38px rgba(37,99,235,.45);animation:rot 3s linear infinite,glow 2.4s ease-in-out infinite}
+.w[data-save="on"]{animation:none!important}
+.w[data-save="on"] .ob{--sp:2.6s}
+@keyframes rot{to{--ang:360deg}}
+@keyframes breath{50%{box-shadow:0 0 18px rgba(37,99,235,.55),0 0 36px rgba(124,58,237,.35)}}
+@keyframes glow{0%,100%{box-shadow:0 0 16px rgba(124,58,237,.70),0 0 38px rgba(37,99,235,.45)}50%{box-shadow:0 0 16px rgba(37,99,235,.70),0 0 38px rgba(124,58,237,.50)}}
+@media (prefers-reduced-motion:reduce){.w,.fx,.fx *{animation:none!important}}
+
+.nav{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:10px 4px 12px;background:var(--screen)}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--muted)}
+.nav .on{color:var(--blue);font-weight:600}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></symbol>
+  <symbol id="set" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+</svg>
+
+<div class="wrap">
+  <h1>Pengaturan</h1>
+  <p class="lead">Pilih gaya animasi dan atur perilaku Nazeio. Semua kontrol bisa dicoba.</p>
+
+  <div class="phone">
+    <div class="scr">
+      <h2>Pengaturan</h2>
+      <p class="sub">Atur tampilan dan perilaku asisten.</p>
+
+      <div class="sec">TAMPILAN</div>
+      <div class="rw" style="border:0;padding-bottom:0"><div>Gaya animasi<small>Berlaku untuk semua widget</small></div></div>
+
+      <div class="prev">
+        <div class="w" id="pw" data-s="aktif" data-save="off">
+          <span class="ob" data-fx="wave" data-s="aktif"></span>
+          <div class="nm">Nazeio</div>
+          <div class="st" id="pst">Aktif</div>
+        </div>
+        <div class="sg" id="sg">
+          <button data-s="mati">Mati</button><button data-s="siaga">Siaga</button><button data-s="aktif" class="on">Aktif</button>
+        </div>
+        <p class="lbl">Pratinjau status</p>
+      </div>
+
+      <div class="opts" id="opts">
+        <button class="opt on" data-fx="wave"><span class="ob" data-fx="wave" data-s="aktif"></span>Gelombang<i>Dipilih</i></button>
+        <button class="opt" data-fx="fan"><span class="ob" data-fx="fan" data-s="aktif"></span>Kipas<i>Dipilih</i></button>
+        <button class="opt" data-fx="storm"><span class="ob" data-fx="storm" data-s="aktif"></span>Badai<i>Dipilih</i></button>
+      </div>
+
+      <div class="rw"><div>Hemat baterai<small>Kurangi bingkai dan matikan neon berputar</small></div><span class="tg" id="save" role="switch" tabindex="0" aria-label="Hemat baterai"></span></div>
+
+      <div class="sec">SIAGA</div>
+      <div class="rw"><div>Mode siaga<small>Mendengar kata pemicu</small></div><span class="tg on" role="switch" tabindex="0" aria-label="Mode siaga"></span></div>
+      <div class="rw"><div>Kata pemicu</div><span class="val">Nazeio</span></div>
+      <div class="rw"><div>Batas diam<small>Percakapan berakhir otomatis</small></div><span class="val">8 detik</span></div>
+
+      <div class="sec">SUARA</div>
+      <div class="rw"><div>Suara bicara</div><span class="val">Indonesia, natural</span></div>
+      <div class="rw"><div>Kecepatan bicara</div><span class="val">Normal</span></div>
+
+      <div class="sec">IZIN</div>
+      <div class="rw"><div>Mikrofon</div><span class="chip">Aktif</span></div>
+      <div class="rw"><div>Aksesibilitas</div><span class="chip r">Perlu izin</span></div>
+      <div class="rw"><div>Tampil di atas aplikasi lain</div><span class="chip r">Perlu izin</span></div>
+    </div>
+    <div class="nav">
+      <div><svg class="ic"><use href="#home"/></svg>Beranda</div>
+      <div><svg class="ic"><use href="#clock"/></svg>Riwayat</div>
+      <div><svg class="ic"><use href="#tag"/></svg>Alias</div>
+      <div class="on"><svg class="ic"><use href="#set"/></svg>Pengaturan</div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+  var MIC='<svg class="ic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg>';
+  var FXW='<span class="fx fx-wave"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="2.6" height="18" rx="1.3"/><rect x="5.8" y="3" width="2.6" height="18" rx="1.3"/><rect x="10.6" y="3" width="2.6" height="18" rx="1.3"/><rect x="15.4" y="3" width="2.6" height="18" rx="1.3"/><rect x="20.2" y="3" width="2.6" height="18" rx="1.3"/></svg></span>';
+  var FXF='<span class="fx fx-fan"><svg viewBox="0 0 24 24"><g fill="#fff"><ellipse cx="12" cy="6" rx="3" ry="5.2"/><ellipse cx="12" cy="6" rx="3" ry="5.2" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6" rx="3" ry="5.2" transform="rotate(240 12 12)"/></g><circle cx="12" cy="12" r="2.2" fill="#7C3AED"/></svg></span>';
+  var FXS='<span class="fx fx-storm"><svg viewBox="0 0 24 24"><circle class="c1" cx="12" cy="12" r="10"/><circle class="c2" cx="12" cy="12" r="6.6"/><circle class="c3" cx="12" cy="12" r="3.4"/><circle class="core" cx="12" cy="12" r="1.2"/></svg></span>';
+  document.querySelectorAll('.ob').forEach(function(o){
+    o.innerHTML='<span class="o"><span class="mic">'+MIC+'</span>'+FXW+FXF+FXS+'</span>';
+  });
+
+  var pw=document.getElementById('pw'),pob=pw.querySelector('.ob'),pst=document.getElementById('pst');
+  var names={mati:'Mati',siaga:'Siaga',aktif:'Aktif'};
+
+  document.getElementById('opts').addEventListener('click',function(e){
+    var b=e.target.closest('.opt');if(!b)return;
+    pob.dataset.fx=b.dataset.fx;
+    this.querySelectorAll('.opt').forEach(function(x){x.classList.toggle('on',x===b)});
+  });
+  document.getElementById('sg').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    var s=b.dataset.s;
+    pw.dataset.s=s;pob.dataset.s=s;pst.textContent=names[s];
+    this.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});
+  });
+  function flip(t){
+    t.classList.toggle('on');
+    var on=t.classList.contains('on');
+    t.setAttribute('aria-checked',on);
+    if(t.id==='save')pw.dataset.save=on?'on':'off';
+  }
+  document.querySelectorAll('.tg').forEach(function(t){
+    t.setAttribute('aria-checked',t.classList.contains('on'));
+    t.addEventListener('click',function(){flip(t)});
+    t.addEventListener('keydown',function(e){if(e.key===' '||e.key==='Enter'){e.preventDefault();flip(t)}});
+  });
+})();
+</script>
+</body>
+</html>

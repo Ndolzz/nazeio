@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nazeio Desain Widget</title>
+<style>
+:root{
+  --page:#EEF2F8;--screen:#FFFFFF;--card:#F8FAFC;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;
+  --blue:#2563EB;--purple:#7C3AED;--red:#DC2626;
+  --bluesoft:#EAF1FF;--purplesoft:#F2ECFF;--redsoft:#FDECEC;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#0A0F1E;--screen:#0F172A;--card:#162033;--text:#F1F5F9;--muted:#94A3B8;--line:#243049;
+  --bluesoft:#16284F;--purplesoft:#2A1F4D;--redsoft:#3A1A1F;}}
+:root[data-theme="dark"]{
+  --page:#0A0F1E;--screen:#0F172A;--card:#162033;--text:#F1F5F9;--muted:#94A3B8;--line:#243049;
+  --bluesoft:#16284F;--purplesoft:#2A1F4D;--redsoft:#3A1A1F;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font-family:Inter,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+.wrap{max-width:1100px;margin:0 auto;padding:28px 16px 40px}
+h1{margin:0;font-size:26px}
+.lead{margin:6px 0 22px;color:var(--muted);font-size:14px}
+h2{font-size:16px;margin:26px 0 4px}
+.cap{color:var(--muted);font-size:13px;margin:0 0 10px}
+.stage{background:linear-gradient(160deg,var(--bluesoft),var(--purplesoft) 70%,var(--page));border:1px solid var(--line);border-radius:24px;padding:20px;display:flex;gap:18px;flex-wrap:wrap;align-items:flex-start;overflow-x:auto}
+.item{display:flex;flex-direction:column;gap:8px;max-width:100%}
+.tag{font-size:12px;color:var(--muted);font-weight:600;padding-left:4px}
+.w{background:var(--screen);border:1px solid var(--line);border-radius:26px;box-shadow:0 8px 22px rgba(15,23,42,.10);position:relative;color:var(--text);max-width:100%}
+.w22{width:156px;height:156px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center}
+.w22 .tg{position:absolute;top:12px;right:12px}
+.w41{width:min(328px,100%);height:76px;display:flex;align-items:center;gap:12px;padding:0 16px}
+.w42{width:min(328px,100%);min-height:164px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
+.row{display:flex;align-items:center;gap:12px}
+.row .tg,.w41 .tg{margin-left:auto}
+.o{width:52px;height:52px;flex:none;border:0;padding:0;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 6px 16px rgba(37,99,235,.30)}
+.w41 .o,.w42 .o{width:44px;height:44px}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.nm{font-weight:700;font-size:14px;line-height:1.2}
+.st{font-size:12px;color:var(--muted)}
+.st span{display:none}
+.tg{width:44px;height:26px;flex:none;border-radius:999px;background:var(--line);position:relative;display:block;cursor:pointer;transition:background .2s}
+.tg::after{content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.3);transition:left .2s}
+.tg:focus-visible,.o:focus-visible,.btn:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+.body{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px;min-height:64px;display:flex;align-items:center;font-size:12px;color:var(--muted)}
+.body>*{display:none}
+.chips{gap:6px;flex-wrap:wrap}
+.chips b{font-weight:500;font-size:11px;padding:6px 10px;border-radius:999px;background:var(--screen);border:1px solid var(--line);color:var(--text)}
+.btn{margin-left:auto;border:0;background:var(--blue);color:#fff;font:inherit;font-weight:600;font-size:12px;padding:8px 14px;border-radius:12px;cursor:pointer}
+.say{font-weight:700;font-size:15px;color:var(--text);flex:1}
+.say u{text-decoration:none;color:var(--purple)}
+.wave{gap:3px;align-items:center;height:28px}
+.wave i{display:block;width:4px;border-radius:2px;height:var(--h);background:linear-gradient(var(--purple),var(--blue))}
+
+.w[data-s="mati"] .o{background:var(--line);color:var(--muted);box-shadow:none}
+.w[data-s="mati"] .st .m{display:inline}
+.w[data-s="siaga"] .st{color:var(--blue)}.w[data-s="siaga"] .st .s{display:inline}
+.w[data-s="aktif"] .st{color:var(--purple)}.w[data-s="aktif"] .st .a{display:inline}
+.w[data-s="aktif"] .o{background:linear-gradient(135deg,var(--purple),var(--blue));animation:pl 1.4s infinite}
+.w:not([data-s="mati"]) .tg{background:var(--blue)}
+.w:not([data-s="mati"]) .tg::after{left:21px}
+.w[data-s="mati"] .body .m{display:block}
+.w[data-s="siaga"] .body .s{display:flex}
+.w[data-s="aktif"] .body .a{display:flex}
+@keyframes pl{50%{box-shadow:0 0 0 10px rgba(124,58,237,.20)}}
+@media (prefers-reduced-motion:reduce){.w[data-s="aktif"] .o{animation:none}}
+
+.rules{background:var(--screen);border:1px solid var(--line);border-radius:18px;padding:14px 18px 14px 36px;font-size:14px;margin:8px 0 0}
+.rules li{margin:5px 0}
+.pal{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.pal span{font-size:12px;padding:6px 10px;border-radius:999px;border:1px solid var(--line);background:var(--screen)}
+.pal i{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;vertical-align:middle}
+
+@property --ang{syntax:"<angle>";inherits:true;initial-value:0deg}
+.seg{display:flex;gap:6px;flex-wrap:wrap;margin:0 0 4px}
+.seg button{font:inherit;font-size:13px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:var(--screen);color:var(--text);cursor:pointer}
+.seg button.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.mic{display:flex}
+.fx{display:none;width:28px;height:28px}
+.fx svg{width:100%;height:100%;display:block;overflow:visible}
+.w:not([data-s="mati"]) .mic{display:none}
+html[data-fx="wave"] .w:not([data-s="mati"]) .fx-wave,
+html[data-fx="fan"] .w:not([data-s="mati"]) .fx-fan,
+html[data-fx="storm"] .w:not([data-s="mati"]) .fx-storm{display:block}
+.w[data-s="siaga"]{--sp:3.2s}
+.w[data-s="aktif"]{--sp:.9s}
+.fx-wave rect{fill:#fff;transform-box:fill-box;transform-origin:center;animation:eq var(--sp,1s) ease-in-out infinite}
+.fx-wave rect:nth-child(2){animation-delay:-.3s}
+.fx-wave rect:nth-child(3){animation-delay:-.6s}
+.fx-wave rect:nth-child(4){animation-delay:-.2s}
+.fx-wave rect:nth-child(5){animation-delay:-.5s}
+@keyframes eq{0%,100%{transform:scaleY(.3)}50%{transform:scaleY(1)}}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fx-fan svg{animation:spin calc(var(--sp,1s)*.8) linear infinite}
+.fx-storm circle{fill:none;stroke:#fff;stroke-width:2;stroke-linecap:round;transform-box:view-box;transform-origin:50% 50%}
+.fx-storm .c1{stroke-dasharray:22 41;animation:spin calc(var(--sp,1s)*1.1) linear infinite}
+.fx-storm .c2{stroke-dasharray:15 26;animation:spin calc(var(--sp,1s)*.8) linear infinite reverse}
+.fx-storm .c3{stroke-dasharray:8 13;animation:spin calc(var(--sp,1s)*.55) linear infinite}
+.fx-storm .core{fill:#fff;stroke:none}
+.w::before{content:"";position:absolute;inset:-2px;border-radius:28px;padding:2px;pointer-events:none;display:none;
+  background:conic-gradient(from var(--ang),#2563EB,#A78BFA,#60A5FA,#7C3AED,#2563EB);
+  -webkit-mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);-webkit-mask-composite:xor;
+  mask:linear-gradient(#000 0 0) content-box,linear-gradient(#000 0 0);mask-composite:exclude}
+.w[data-s="siaga"]::before,.w[data-s="aktif"]::before{display:block}
+.w[data-s="siaga"]{box-shadow:0 0 12px rgba(37,99,235,.40),0 0 28px rgba(124,58,237,.22);animation:rot 14s linear infinite,breath 3.2s ease-in-out infinite}
+.w[data-s="aktif"]{box-shadow:0 0 16px rgba(124,58,237,.70),0 0 38px rgba(37,99,235,.45);animation:rot 3s linear infinite,glow 2.4s ease-in-out infinite}
+@keyframes rot{to{--ang:360deg}}
+@keyframes breath{50%{box-shadow:0 0 18px rgba(37,99,235,.55),0 0 36px rgba(124,58,237,.35)}}
+@keyframes glow{0%,100%{box-shadow:0 0 16px rgba(124,58,237,.70),0 0 38px rgba(37,99,235,.45)}50%{box-shadow:0 0 16px rgba(37,99,235,.70),0 0 38px rgba(124,58,237,.50)}}
+@media (prefers-reduced-motion:reduce){.w,.fx *,.fx{animation:none!important}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Widget Nazeio</h1>
+  <p class="lead">Tiga ukuran dan tiga status. Pilih gaya animasi, lalu ketuk mikrofon atau geser tombol.</p>
+  <div class="seg" role="group" aria-label="Gaya animasi"><button data-fx="wave" class="on">Gelombang</button><button data-fx="fan">Kipas</button><button data-fx="storm">Badai</button></div>
+
+  <h2>2 x 2</h2>
+  <p class="cap">Paling ringkas. Mikrofon di tengah, tombol siaga di sudut.</p>
+  <div class="stage" id="s22"></div>
+
+  <h2>4 x 1</h2>
+  <p class="cap">Satu baris. Cocok di atas dock.</p>
+  <div class="stage" id="s41"></div>
+
+  <h2>4 x 2</h2>
+  <p class="cap">Paling informatif. Isi bagian bawah mengikuti status.</p>
+  <div class="stage" id="s42"></div>
+
+  <h2>Perilaku</h2>
+  <ol class="rules">
+    <li>Ketuk mikrofon: memulai percakapan langsung tanpa kata pemicu. Ketuk lagi untuk mengakhiri.</li>
+    <li>Geser tombol: menyalakan atau mematikan mode siaga.</li>
+    <li>Ketuk nama Nazeio: membuka aplikasi.</li>
+    <li>Mati abu abu tanpa neon. Siaga biru dengan neon berdenyut pelan. Aktif ungu dengan neon berputar. Merah hanya untuk galat mikrofon.</li>
+  </ol>
+  <h2>Cara membuatnya di Android</h2>
+  <ol class="rules">
+    <li>Widget asli tidak menjalankan animasi sendiri. Gelombang, kipas, dan badai dibuat dengan mengganti gambar bingkai, sekitar 8 sampai 12 bingkai per detik, dari layanan siaga yang sudah berjalan.</li>
+    <li>Neon digambar sebagai tepi bergradien dengan cahaya blur, lalu diganti per bingkai. Saat Siaga cukup 2 sampai 4 bingkai agar hemat baterai, saat Aktif lebih rapat.</li>
+    <li>Sistem atau launcher dapat membatasi pembaruan yang terlalu sering, jadi kehalusannya perlu diuji di HP.</li>
+    <li>Untuk animasi penuh dan halus saat Aktif, tambahkan gelembung melayang (overlay) berbasis Compose dengan 60 bingkai per detik.</li>
+  </ol>
+  <div class="pal">
+    <span><i style="background:#2563EB"></i>Biru #2563EB</span>
+    <span><i style="background:#7C3AED"></i>Ungu #7C3AED</span>
+    <span><i style="background:#DC2626"></i>Merah #DC2626</span>
+    <span><i style="background:#64748B"></i>Abu #64748B</span>
+  </div>
+</div>
+
+<script>
+(function(){
+  var MIC='<svg class="ic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></svg>';
+  var FXW='<span class="fx fx-wave"><svg viewBox="0 0 24 24"><rect x="1" y="3" width="2.6" height="18" rx="1.3"/><rect x="5.8" y="3" width="2.6" height="18" rx="1.3"/><rect x="10.6" y="3" width="2.6" height="18" rx="1.3"/><rect x="15.4" y="3" width="2.6" height="18" rx="1.3"/><rect x="20.2" y="3" width="2.6" height="18" rx="1.3"/></svg></span>';
+  var FXF='<span class="fx fx-fan"><svg viewBox="0 0 24 24"><g fill="#fff"><ellipse cx="12" cy="6" rx="3" ry="5.2"/><ellipse cx="12" cy="6" rx="3" ry="5.2" transform="rotate(120 12 12)"/><ellipse cx="12" cy="6" rx="3" ry="5.2" transform="rotate(240 12 12)"/></g><circle cx="12" cy="12" r="2.2" fill="#7C3AED"/></svg></span>';
+  var FXS='<span class="fx fx-storm"><svg viewBox="0 0 24 24"><circle class="c1" cx="12" cy="12" r="10"/><circle class="c2" cx="12" cy="12" r="6.6"/><circle class="c3" cx="12" cy="12" r="3.4"/><circle class="core" cx="12" cy="12" r="1.2"/></svg></span>';
+  var ORB='<button class="o" data-a="orb" aria-label="Bicara dengan Nazeio"><span class="mic">'+MIC+'</span>'+FXW+FXF+FXS+'</button>';
+  document.documentElement.dataset.fx='wave';
+  document.querySelector('.seg').addEventListener('click',function(e){
+    var b=e.target.closest('button');if(!b)return;
+    document.documentElement.dataset.fx=b.dataset.fx;
+    this.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b)});
+  });
+  var TG='<span class="tg" data-a="tg" role="switch" tabindex="0" aria-label="Mode siaga"></span>';
+  var ST='<span class="st"><span class="m">Mati</span><span class="s">Siaga</span><span class="a">Aktif</span></span>';
+  var NM='<div><div class="nm">Nazeio</div>'+ST+'</div>';
+  var WAVE=[18,40,72,50,90,60,34,78,46,84,30].map(function(h){return '<i style="--h:'+h+'%"></i>'}).join('');
+  var BODY='<div class="body">'
+    +'<div class="m">Nyalakan mode siaga untuk memakai kata Nazeio.<button class="btn" data-a="tg">Nyalakan</button></div>'
+    +'<div class="s chips"><b>Buka aplikasi</b><b>Bluetooth</b><b>WhatsApp</b><b>Screenshot</b></div>'
+    +'<div class="a"><span class="say" style="display:block">buka <u>youtube</u></span><span class="wave" style="display:flex">'+WAVE+'</span></div>'
+    +'</div>';
+  function w22(s){return '<div class="w w22" data-s="'+s+'">'+TG+ORB+NM+'</div>'}
+  function w41(s){return '<div class="w w41" data-s="'+s+'">'+ORB+NM+TG+'</div>'}
+  function w42(s){return '<div class="w w42" data-s="'+s+'"><div class="row">'+ORB+NM+TG+'</div>'+BODY+'</div>'}
+  function fill(id,fn){
+    var h='';
+    [['mati','Mati'],['siaga','Siaga'],['aktif','Aktif']].forEach(function(p){
+      h+='<div class="item"><span class="tag">'+p[1]+'</span>'+fn(p[0])+'</div>';
+    });
+    document.getElementById(id).innerHTML=h;
+  }
+  fill('s22',w22);fill('s41',w41);fill('s42',w42);
+
+  function act(t){
+    var w=t.closest('.w');if(!w)return;
+    var s=w.dataset.s,a=t.dataset.a;
+    if(a==='tg'){w.dataset.s=(s==='mati')?'siaga':'mati';}
+    else if(a==='orb'){
+      if(s==='aktif'){w.dataset.s=w.dataset.prev||'siaga';}
+      else{w.dataset.prev=s;w.dataset.s='aktif';}
+    }
+  }
+  document.addEventListener('click',function(e){var t=e.target.closest('[data-a]');if(t)act(t)});
+  document.addEventListener('keydown',function(e){
+    if((e.key===' '||e.key==='Enter')&&e.target.matches('.tg')){e.preventDefault();act(e.target)}
+  });
+  document.querySelectorAll('.tg').forEach(function(){});
+})();
+</script>
+</body>
+</html>

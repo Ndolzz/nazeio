@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Nazeio Desain Antarmuka</title>
+<style>
+:root{
+  --page:#EEF2F8;--screen:#FFFFFF;--card:#F8FAFC;--text:#0F172A;--muted:#64748B;--line:#E2E8F0;
+  --blue:#2563EB;--purple:#7C3AED;--red:#DC2626;
+  --bluesoft:#EAF1FF;--purplesoft:#F2ECFF;--redsoft:#FDECEC;--frame:#0F172A;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --page:#0A0F1E;--screen:#0F172A;--card:#162033;--text:#F1F5F9;--muted:#94A3B8;--line:#243049;
+  --bluesoft:#16284F;--purplesoft:#2A1F4D;--redsoft:#3A1A1F;--frame:#243049;}}
+:root[data-theme="dark"]{
+  --page:#0A0F1E;--screen:#0F172A;--card:#162033;--text:#F1F5F9;--muted:#94A3B8;--line:#243049;
+  --bluesoft:#16284F;--purplesoft:#2A1F4D;--redsoft:#3A1A1F;--frame:#243049;}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--page);color:var(--text);font-family:Inter,system-ui,"Segoe UI",Roboto,sans-serif;line-height:1.45}
+header{padding:28px 20px 8px;max-width:1200px;margin:0 auto}
+h1{margin:0;font-size:26px;letter-spacing:.2px}
+header p{margin:6px 0 0;color:var(--muted);font-size:14px}
+.pal{display:flex;gap:10px;flex-wrap:wrap;padding:14px 20px 4px;max-width:1200px;margin:0 auto}
+.sw{display:flex;align-items:center;gap:8px;background:var(--screen);border:1px solid var(--line);border-radius:12px;padding:8px 12px;font-size:12px}
+.sw i{width:18px;height:18px;border-radius:6px;display:block;border:1px solid var(--line)}
+.sw b{display:block;font-weight:600}.sw span{color:var(--muted)}
+.rail{display:flex;gap:28px;overflow-x:auto;padding:20px;scroll-snap-type:x mandatory;max-width:100%}
+.col{flex:0 0 auto;scroll-snap-align:center}
+.lab{font-size:13px;font-weight:600;margin:0 0 10px 6px;color:var(--muted)}
+.phone{width:300px;height:620px;border:8px solid var(--frame);border-radius:38px;background:var(--screen);overflow:hidden;display:flex;flex-direction:column;box-shadow:0 18px 40px rgba(15,23,42,.14)}
+.scr{flex:1;padding:22px 18px 10px;display:flex;flex-direction:column;overflow:hidden}
+.ic{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:18px}
+.brand{display:flex;align-items:center;gap:8px;font-weight:700;font-size:15px}
+.brand i{width:10px;height:10px;border-radius:50%;background:var(--purple);display:block}
+.chip{font-size:11px;font-weight:600;padding:5px 10px;border-radius:999px;background:var(--bluesoft);color:var(--blue)}
+.chip.p{background:var(--purplesoft);color:var(--purple)}
+.chip.r{background:var(--redsoft);color:var(--red)}
+h2{margin:0 0 4px;font-size:22px;line-height:1.2}
+.sub{color:var(--muted);font-size:13px;margin:0}
+.orbwrap{display:flex;flex-direction:column;align-items:center;margin:26px 0 20px}
+.ring{width:150px;height:150px;border-radius:50%;border:1px solid var(--purplesoft);display:flex;align-items:center;justify-content:center;background:radial-gradient(circle,var(--purplesoft) 0%,transparent 70%)}
+.orb{width:104px;height:104px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center;box-shadow:0 10px 28px rgba(37,99,235,.35)}
+.orb .ic{width:38px;height:38px}
+.cap{margin-top:12px;font-size:13px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+.chips span{font-size:12px;padding:7px 12px;border:1px solid var(--line);border-radius:999px;background:var(--card)}
+.sec{font-size:12px;font-weight:600;color:var(--muted);margin:0 0 8px;letter-spacing:.4px}
+.row{display:flex;justify-content:space-between;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 14px;margin-bottom:8px;font-size:13px}
+.row small{color:var(--blue);font-weight:600;font-size:11px}
+.nav{display:flex;justify-content:space-around;border-top:1px solid var(--line);padding:10px 4px 12px;background:var(--screen)}
+.nav div{display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;color:var(--muted)}
+.nav .on{color:var(--blue);font-weight:600}
+.say{font-size:26px;font-weight:700;line-height:1.25;margin:34px 0 8px}
+.say u{text-decoration:none;color:var(--purple)}
+.caret{display:inline-block;width:3px;height:26px;background:var(--purple);vertical-align:middle;margin-left:3px;animation:b 1s infinite}
+@keyframes b{50%{opacity:0}}
+.wave{display:flex;align-items:center;justify-content:center;gap:5px;height:90px;margin:26px 0}
+.wave i{display:block;width:5px;border-radius:3px;background:linear-gradient(var(--purple),var(--blue));height:var(--h);animation:w 1.2s ease-in-out infinite}
+.wave i:nth-child(2n){animation-delay:.2s}.wave i:nth-child(3n){animation-delay:.4s}
+@keyframes w{50%{transform:scaleY(.55)}}
+.match{background:var(--bluesoft);border-radius:14px;padding:12px 14px;font-size:13px}
+.match b{color:var(--blue)}
+.btn{display:block;text-align:center;font-weight:600;font-size:14px;padding:13px;border-radius:14px;border:1px solid var(--line);background:var(--screen);color:var(--text)}
+.btn.b{background:var(--blue);border-color:var(--blue);color:#fff}
+.grow{flex:1}
+.search{border:1px solid var(--line);border-radius:14px;background:var(--card);padding:11px 14px;font-size:13px;color:var(--muted);margin:14px 0}
+.al{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px 14px;margin-bottom:9px}
+.al b{font-size:14px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.tags span{font-size:11px;padding:4px 9px;border-radius:999px;background:var(--bluesoft);color:var(--blue)}
+.step{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-bottom:1px solid var(--line);font-size:13px}
+.step:last-of-type{border-bottom:0}
+.num{flex:0 0 24px;height:24px;border-radius:50%;background:var(--purplesoft);color:var(--purple);font-weight:700;font-size:12px;display:flex;align-items:center;justify-content:center}
+.step.risk .num{background:var(--redsoft);color:var(--red)}
+.step .chip{margin-top:5px;display:inline-block}
+.warn{background:var(--redsoft);color:var(--red);border-radius:14px;padding:11px 14px;font-size:12px;font-weight:500;margin:12px 0}
+.acts{display:flex;gap:10px;margin-top:auto;padding-bottom:10px}
+.acts .btn{flex:1}
+.note{max-width:1200px;margin:0 auto;padding:6px 20px 36px;color:var(--muted);font-size:13px}
+.home{flex:1;padding:28px 16px 16px;display:flex;flex-direction:column;gap:12px;background:linear-gradient(160deg,var(--bluesoft),var(--purplesoft) 70%,var(--screen))}
+.clock{font-size:46px;font-weight:300;line-height:1;margin-top:6px}
+.date{color:var(--muted);font-size:13px;margin-bottom:8px}
+.wg{background:var(--screen);border:1px solid var(--line);border-radius:24px;padding:14px;box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.wg b{font-size:14px;display:block}.wg small{display:block;color:var(--muted);font-size:12px}
+.wg .hd{display:flex;align-items:center;gap:12px}
+.wg.wide{display:flex;align-items:center;gap:12px}
+.mini{width:46px;height:46px;flex:0 0 46px;border-radius:50%;background:linear-gradient(135deg,var(--blue),var(--purple));color:#fff;display:flex;align-items:center;justify-content:center}
+.mini .ic{width:22px;height:22px}
+.mini.l{animation:pl 1.4s infinite}
+@keyframes pl{50%{box-shadow:0 0 0 10px rgba(124,58,237,.2)}}
+.two{display:flex;gap:12px}
+.two .wg{flex:1;padding:12px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;text-align:center}
+.qa{display:flex;gap:8px;margin-top:12px}
+.qa span{flex:1;text-align:center;font-size:11px;padding:8px 4px;border-radius:12px;background:var(--card);border:1px solid var(--line)}
+.tg{width:44px;height:26px;flex:none;border-radius:999px;background:var(--line);position:relative;display:block;cursor:pointer;transition:background .2s}
+.tg::after{transition:left .2s;content:"";position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(15,23,42,.3)}
+.tg.on{background:var(--blue)}
+.tg:focus-visible{outline:2px solid var(--purple);outline-offset:2px}
+.chip.off{background:var(--line);color:var(--muted)}
+.tg.on::after{left:21px}
+.tgrow{display:flex;align-items:center;justify-content:space-between;gap:12px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px 14px;margin-bottom:16px}
+.tgrow b{font-size:14px;display:block}.tgrow small{color:var(--muted);font-size:12px}
+.mini.off{background:var(--line);color:var(--muted)}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="mic" viewBox="0 0 24 24"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2M12 19v3"/></symbol>
+  <symbol id="home" viewBox="0 0 24 24"><path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/></symbol>
+  <symbol id="clock" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></symbol>
+  <symbol id="tag" viewBox="0 0 24 24"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="8.5" r="1"/></symbol>
+  <symbol id="set" viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h2M10 17h10"/><circle cx="16" cy="7" r="2"/><circle cx="8" cy="17" r="2"/></symbol>
+</svg>
+
+<header>
+  <h1>Nazeio</h1>
+  <p>Desain antarmuka asisten Android. Minimalis, bersih, dan profesional.</p>
+</header>
+
+<div class="pal">
+  <div class="sw"><i style="background:#FFFFFF"></i><div><b>Putih</b><span>#FFFFFF</span></div></div>
+  <div class="sw"><i style="background:#2563EB"></i><div><b>Biru</b><span>#2563EB</span></div></div>
+  <div class="sw"><i style="background:#7C3AED"></i><div><b>Ungu</b><span>#7C3AED</span></div></div>
+  <div class="sw"><i style="background:#DC2626"></i><div><b>Merah</b><span>#DC2626</span></div></div>
+</div>
+
+<div class="rail">
+
+  <div class="col">
+    <p class="lab">1 Beranda</p>
+    <div class="phone">
+      <div class="scr">
+        <div class="top"><div class="brand"><i></i>Nazeio</div><span class="chip">Siaga</span></div>
+        <h2>Apa yang bisa saya bantu?</h2>
+        <p class="sub">Ucapkan Nazeio kapan saja.</p>
+        <div class="orbwrap">
+          <div class="ring"><div class="orb"><svg class="ic"><use href="#mic"/></svg></div></div>
+          <div class="cap">Atau ketuk untuk berbicara</div>
+        </div>
+        <div class="tgrow"><div><b>Mode siaga</b><small>Mendengar kata Nazeio</small></div><span class="tg on"></span></div>
+        <p class="sec">TERAKHIR</p>
+        <div class="row">Buka Spotify<small>Berhasil</small></div>
+        <div class="row">Screenshot<small>Berhasil</small></div>
+      </div>
+      <div class="nav">
+        <div class="on"><svg class="ic"><use href="#home"/></svg>Beranda</div>
+        <div><svg class="ic"><use href="#clock"/></svg>Riwayat</div>
+        <div><svg class="ic"><use href="#tag"/></svg>Alias</div>
+        <div><svg class="ic"><use href="#set"/></svg>Pengaturan</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p class="lab">2 Mendengar</p>
+    <div class="phone">
+      <div class="scr">
+        <div class="top"><div class="brand"><i></i>Nazeio</div><span class="chip p">Percakapan aktif</span></div>
+        <div class="say">buka <u>youtube</u><span class="caret"></span></div>
+        <p class="sub">Nazeio terus merespons sampai kamu diam 8 detik atau berkata selesai.</p>
+        <div class="wave">
+          <i style="--h:18%"></i><i style="--h:40%"></i><i style="--h:72%"></i><i style="--h:50%"></i><i style="--h:90%"></i><i style="--h:60%"></i><i style="--h:34%"></i><i style="--h:78%"></i><i style="--h:46%"></i><i style="--h:84%"></i><i style="--h:30%"></i><i style="--h:62%"></i><i style="--h:22%"></i>
+        </div>
+        <div class="match">Cocok dengan <b>YouTube</b></div>
+        <div class="grow"></div>
+        <div class="btn" style="margin-bottom:12px">Berhenti</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p class="lab">3 Alias</p>
+    <div class="phone">
+      <div class="scr">
+        <div class="top"><div class="brand"><i></i>Nazeio</div><span class="chip">12 alias</span></div>
+        <h2>Alias</h2>
+        <p class="sub">Satu aksi, banyak sebutan.</p>
+        <div class="search">Cari alias</div>
+        <div class="al"><b>Bluetooth</b><div class="tags"><span>bt</span><span>blutut</span></div></div>
+        <div class="al"><b>WhatsApp</b><div class="tags"><span>wa</span></div></div>
+        <div class="al"><b>Screenshot</b><div class="tags"><span>ss</span><span>tangkap layar</span></div></div>
+        <div class="grow"></div>
+        <div class="btn b" style="margin-bottom:10px">Tambah alias</div>
+      </div>
+      <div class="nav">
+        <div><svg class="ic"><use href="#home"/></svg>Beranda</div>
+        <div><svg class="ic"><use href="#clock"/></svg>Riwayat</div>
+        <div class="on"><svg class="ic"><use href="#tag"/></svg>Alias</div>
+        <div><svg class="ic"><use href="#set"/></svg>Pengaturan</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p class="lab">4 Konfirmasi Tugas</p>
+    <div class="phone">
+      <div class="scr">
+        <div class="top"><div class="brand"><i></i>Nazeio</div><span class="chip p">Tugas Agen</span></div>
+        <h2>Konfirmasi rencana</h2>
+        <p class="sub">Periksa sebelum dijalankan.</p>
+        <div style="margin-top:12px">
+          <div class="step"><div class="num">1</div><div>Buat proyek website</div></div>
+          <div class="step risk"><div class="num">2</div><div>Push ke GitHub<br><span class="chip r">Berisiko</span></div></div>
+          <div class="step"><div class="num">3</div><div>Atur Supabase</div></div>
+          <div class="step risk"><div class="num">4</div><div>Deploy ke Vercel<br><span class="chip r">Berisiko</span></div></div>
+        </div>
+        <div class="warn">Dua langkah tidak bisa dibatalkan.</div>
+        <div class="acts"><div class="btn">Batalkan</div><div class="btn b">Jalankan</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="col">
+    <p class="lab">5 Widget Layar Utama</p>
+    <div class="phone">
+      <div class="home">
+        <div class="clock">09.41</div>
+        <div class="date">Minggu, 4 Oktober</div>
+
+        <div class="wg">
+          <div class="hd">
+            <div class="mini"><svg class="ic"><use href="#mic"/></svg></div>
+            <div><b>Nazeio</b><small>Siaga, ucapkan Nazeio</small></div>
+            <span class="tg on" style="margin-left:auto"></span>
+          </div>
+          <div class="qa"><span>Buka aplikasi</span><span>Bluetooth</span><span>WhatsApp</span></div>
+        </div>
+
+        <div class="two">
+          <div class="wg"><div class="mini off"><svg class="ic"><use href="#mic"/></svg></div><div><b>Nazeio</b><small>Mati</small></div><span class="tg"></span></div>
+          <div class="wg"><div class="mini l"><svg class="ic"><use href="#mic"/></svg></div><div><b>Nazeio</b><small style="color:var(--purple)">Aktif</small></div><span class="tg on"></span></div>
+        </div>
+
+        <div class="wg wide">
+          <div class="mini"><svg class="ic"><use href="#mic"/></svg></div>
+          <div><b>Mode siaga</b><small>Ucapkan Nazeio kapan saja</small></div><span class="tg on" style="margin-left:auto"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<p class="note">Biru untuk aksi utama, ungu untuk hal yang berkaitan dengan asisten, merah hanya untuk risiko. Tombol geser menyalakan dan mematikan mode siaga. Tanpa emoji dan tanpa tanda strip pada teks.</p>
+<script>
+(function(){
+  var g=[].slice.call(document.querySelectorAll('.tgrow .tg,.wg .hd .tg,.wg.wide .tg'));
+  var chip=document.querySelector('.top .chip');
+  var t1=document.querySelector('.tgrow small');
+  var t2=document.querySelector('.wg .hd small');
+  var t3=document.querySelector('.wg.wide small');
+  function aria(e){e.setAttribute('aria-checked',e.classList.contains('on'))}
+  function set(on){
+    g.forEach(function(e){e.classList.toggle('on',on);aria(e)});
+    chip.textContent=on?'Siaga':'Mati';
+    chip.classList.toggle('off',!on);
+    t1.textContent=on?'Mendengar kata Nazeio':'Tidak mendengarkan';
+    t2.textContent=on?'Siaga, ucapkan Nazeio':'Mati, ketuk untuk menyalakan';
+    t3.textContent=on?'Ucapkan Nazeio kapan saja':'Mati';
+  }
+  document.querySelectorAll('.tg').forEach(function(e){
+    e.setAttribute('role','switch');e.tabIndex=0;aria(e);
+    function go(){
+      if(g.indexOf(e)>-1){set(!e.classList.contains('on'))}
+      else{e.classList.toggle('on');aria(e)}
+    }
+    e.addEventListener('click',go);
+    e.addEventListener('keydown',function(ev){if(ev.key===' '||ev.key==='Enter'){ev.preventDefault();go()}});
+  });
+})();
+</script>
+</body>
+</html>
