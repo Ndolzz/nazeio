@@ -12,9 +12,10 @@ Pengguna memasang pengingat dengan suara, misalnya "ingatkan aku lima menit lagi
 6. Pengingat dicatat di database Room dan dipasang ulang otomatis setelah HP dinyalakan kembali.
 7. Baris pengingat dihapus dari database setelah notifikasinya tampil.
 8. Pengingat aktif bisa dilihat dan dihapus dari layar Pengingat sesuai spesifikasi 12. Menghapus dari layar juga membatalkan alarmnya.
+9. Alarm dipasang presisi lewat setExactAndAllowWhileIdle. Bila izin alarm presisi belum diberikan di Android 12 ke atas, alarm biasa dipakai sebagai cadangan.
 
 ## Batasan
-1. Tanpa izin alarm presisi, waktu bisa melesat beberapa menit di mode hemat baterai.
+1. Bila izin alarm presisi tidak diberikan di Android 12 ke atas, waktu bisa meleset beberapa menit di mode hemat baterai karena alarm biasa dipakai sebagai cadangan.
 2. Pengingat yang jatuh saat HP mati dibiarkan lewat dan dihapus saat pemasangan berikutnya.
 3. Teks pengingat khusus belum didukung, notifikasi memakai pesan baku.
 4. Notifikasi hanya tampil bila izin notifikasi sudah diberikan.
