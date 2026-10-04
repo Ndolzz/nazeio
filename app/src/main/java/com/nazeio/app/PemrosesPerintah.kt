@@ -21,6 +21,9 @@ class PemrosesPerintah(private val context: Context) {
     /** Nama aplikasi yang menunggu jawaban konfirmasi pengguna. */
     private var konfirmasiTertunda: String? = null
 
+    /** Nama aplikasi yang menunggu jawaban konfirmasi pengguna. */
+    private var konfirmasiTertunda: String? = null
+
     sealed class Hasil {
         data class Selesai(val pesan: String) : Hasil()
         data class Bicara(val pesan: String) : Hasil()
@@ -81,8 +84,26 @@ class PemrosesPerintah(private val context: Context) {
         if (bersih.contains("ingatkan")) {
             val waktu = PengingatWaktu.dariUcapan(bersih, System.currentTimeMillis())
             if (waktu == null) return Hasil.Bicara("Kapan pengingatnya. Contoh, ingatkan aku lima menit lagi")
-            return if (pasangPengingat(waktu)) Hasil.Selesai("Baik, saya ingatkan")
+            val repo = com.nazeio.app.data.RepositoriPengingat(context)
+            return if (repo.pasang(waktu)) Hasil.Selesai("Baik, saya ingatkan")
             else Hasil.Bicara("Pengingat gagal dipasang")
+        }
+
+        // Cari di Google sesuai spesifikasi 11.
+        if (bersih.contains("google") && bersih.contains("cari")) {
+            val query = bersih
+                .replace("cari di google", "")
+                .replace("carikan di google", "")
+                .replace("cari google", "")
+                .replace("google", "")
+                .replace("carikan", "")
+                .replace("cari", "")
+                .replace("tolong", "")
+                .replace("di", "")
+                .trim()
+            if (query.isBlank()) return Hasil.Bicara("Cari apa di Google")
+            return if (cariGoogle(query)) Hasil.Selesai("Mencari " + query + " di Google")
+            else Hasil.Bicara("Google tidak bisa dibuka")
         }
 
         // Cari di YouTube.
@@ -207,9 +228,9 @@ class PemrosesPerintah(private val context: Context) {
         return hasil.trim()
     }
 
-    private fun cariYoutube(query: String): Boolean {
+    private fun cariGoogle(query: String): Boolean {
         return try {
-            val url = "https://www.youtube.com/results?search_query=" + Uri.encode(query)
+            val url = "https://www.google.com/search?q=" + Uri.encode(query)
             context.startActivity(
                 Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
@@ -219,17 +240,12 @@ class PemrosesPerintah(private val context: Context) {
         }
     }
 
-    private fun pasangPengingat(waktu: Long): Boolean {
+    private fun cariYoutube(query: String): Boolean {
         return try {
-            val am = context.getSystemService(android.app.AlarmManager::class.java) ?: return false
-            val kode = (waktu / 1000).toInt()
-            val niat = Intent(context, PenerimaPengingat::class.java)
-                .putExtra(PenerimaPengingat.EXTRA_ID, kode)
-            val pi = android.app.PendingIntent.getBroadcast(
-                context, kode, niat,
-                android.app.PendingIntent.FLAG_IMMUTABLE or android.app.PendingIntent.FLAG_UPDATE_CURRENT
+            val url = "https://www.youtube.com/results?search_query=" + Uri.encode(query)
+            context.startActivity(
+                Intent(Intent.ACTION_VIEW, Uri.parse(url)).addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
             )
-            am.setAndAllowWhileIdle(android.app.AlarmManager.RTC_WAKEUP, waktu, pi)
             true
         } catch (e: Exception) {
             false
