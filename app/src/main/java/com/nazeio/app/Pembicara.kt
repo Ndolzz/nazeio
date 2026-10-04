@@ -39,12 +39,23 @@ class Pembicara(context: Context) {
     }
 
     companion object {
+        private val PENANDA_KODE = String(charArrayOf(96.toChar(), 96.toChar(), 96.toChar()))
+
         /**
          * Jawaban panjang diringkas saat dibacakan sesuai spesifikasi 03.
          * Jawaban berisi kode tidak dibacakan baris demi baris.
          */
         fun ringkasUntukBaca(teks: String): String {
-            val tanpaKode = teks.replace(Regex("```[\s\S]*?```", RegexOption.MULTILINE), " Kode ditampilkan di layar. ")
+            val tanpaKode = if (teks.contains(PENANDA_KODE)) {
+                val bagian = teks.split(PENANDA_KODE)
+                val teksSaja = bagian.filterIndexed { i, _ -> i % 2 == 0 }
+                    .joinToString(" ")
+                    .trim()
+                if (teksSaja.isBlank()) "Kode ditampilkan di layar."
+                else teksSaja + " Kode ditampilkan di layar."
+            } else {
+                teks
+            }
             return if (tanpaKode.length > 300) {
                 tanpaKode.take(280) + " Selengkapnya di layar."
             } else {
