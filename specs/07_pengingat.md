@@ -9,18 +9,22 @@ Pengguna memasang pengingat dengan suara, misalnya "ingatkan aku lima menit lagi
 3. Bila waktu tidak dikenali, Nazeio bertanya kapan pengingat dipasang dan memberi contoh.
 4. Saat waktunya tiba, Nazeio menampilkan notifikasi berprioritas tinggi.
 5. Waktu yang sudah lewat digeser ke hari berikutnya.
+6. Pengingat dicatat di database Room dan dipasang ulang otomatis setelah HP dinyalakan kembali.
+7. Baris pengingat dihapus dari database setelah notifikasinya tampil.
 
 ## Batasan
-1. Pengingat hilang bila HP dimatikan ulang. Penyimpanan permanen menyusul.
-2. Memakai AlarmManager tanpa izin alarm presisi sehingga bisa melesat beberapa menit di mode hemat baterai.
+1. Tanpa izin alarm presisi, waktu bisa melesat beberapa menit di mode hemat baterai.
+2. Pengingat yang jatuh saat HP mati dibiarkan lewat dan dihapus saat pemasangan berikutnya.
 3. Teks pengingat khusus belum didukung, notifikasi memakai pesan baku.
 4. Notifikasi hanya tampil bila izin notifikasi sudah diberikan.
 
 ## Di luar cakupan
 1. Pengingat berulang.
 2. Pengingat berbasis lokasi.
+3. Daftar pengingat yang bisa dilihat dan dihapus di layar aplikasi.
 
 ## Kriteria selesai
 1. "Ingatkan aku lima menit lagi" menampilkan notifikasi paling lama enam menit kemudian.
 2. Waktu yang tidak dikenali meminta klarifikasi tanpa memasang pengingat.
 3. Tes unit untuk pembacaan waktu lulus di CI.
+4. Pengingat yang dipasang sebelum HP dimatikan tetap berbunyi setelah HP dinyalakan kembali.

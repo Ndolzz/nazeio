@@ -7,12 +7,13 @@ Nazeio adalah asisten suara pribadi untuk Android. Aplikasi mendengarkan kata pe
 1. Mode siaga dengan kata pemicu Nazeio. Percakapan berlanjut sampai pengguna diam 8 detik, berkata selesai, atau menekan tombol berhenti.
 2. Buka aplikasi dengan pencocokan nama tahan salah ucap. Kecocokan di bawah 0,9 dimintai konfirmasi lisan.
 3. Buka panel pengaturan lewat alias suara yang tersimpan sebagai data.
-4. Buka WhatsApp dan cari di YouTube.
+4. Buka WhatsApp, cari di YouTube, dan cari di Google.
 5. Tanya jawab dengan Gemini atau Claude memakai kunci API milik pengguna. Kunci disimpan terenkripsi dan ada batas pemakaian harian.
 6. Tiga widget berukuran 2 x 2, 4 x 1, dan 4 x 2 dengan status Mati, Siaga, dan Aktif.
-7. Pengingat suara, misalnya ingatkan aku lima menit lagi, atau pukul 7.
+7. Pengingat suara, misalnya ingatkan aku lima menit lagi, atau pukul 7. Pengingat bertahan setelah HP dinyalakan ulang.
 8. Telepon lewat dialer dengan nama kontak atau nomor. Aplikasi tidak pernah menelepon langsung.
 9. Pertanyaan lokal tanpa internet: jam, hari, tanggal, baterai, dan hitungan hari menuju tanggal tertentu.
+10. Riwayat perintah tersimpan permanen dan dimuat kembali saat aplikasi dibuka.
 
 ## Batasan
 
@@ -45,6 +46,8 @@ Butuh JDK 17.
 7. 07_pengingat.md
 8. 08_telepon.md
 9. 09_waktu_tanggal.md
+10. 10_riwayat_permanen.md
+11. 11_pencarian_google.md
 
 ## Lisensi
 
