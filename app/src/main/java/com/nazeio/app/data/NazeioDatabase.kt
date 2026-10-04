@@ -2,7 +2,6 @@ package com.nazeio.app.data
 
 import android.content.Context
 import androidx.room.Database
-import RoomBuilderKt
 import androidx.room.Room
 import androidx.room.RoomDatabase
 
@@ -17,13 +16,11 @@ abstract class NazeioDatabase : RoomDatabase() {
 
         fun ambil(context: Context): NazeioDatabase {
             return INSTANCE ?: synchronized(this) {
-                val db = Room.databaseBuilder(
+                Room.databaseBuilder(
                     context.applicationContext,
-                    NazeioDatabase::t::class,
+                    NazeioDatabase::class.java,
                     "nazeio.db"
-                ).build()
-                INSTANCE = db
-                return db
+                ).build().also { INSTANCE = it }
             }
         }
     }
