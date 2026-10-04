@@ -37,6 +37,13 @@ class MainActivity : ComponentActivity() {
         ) {
             requestPermissions(arrayOf(android.Manifest.permission.READ_CONTACTS), 1)
         }
+        // Izin Bluetooth untuk fitur kontrol Bluetooth di Android 12 ke atas.
+        if (android.os.Build.VERSION.SDK_INT >= 31 &&
+            checkSelfPermission(android.Manifest.permission.BLUETOOTH_CONNECT) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(android.Manifest.permission.BLUETOOTH_CONNECT), 2)
+        }
         setContent {
             NazeioTheme {
                 var tab by remember { mutableIntStateOf(0) }

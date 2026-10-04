@@ -9,7 +9,8 @@ import com.nazeio.app.data.RepositoriAlias
 /**
  * Memproses satu perintah ucapan menjadi aksi nyata.
  * Dipakai oleh layanan siaga dan layar Beranda.
- * Menangani: buka aplikasi, kirim chat WhatsApp, cari YouTube, tanya AI.
+ * Menangani: buka aplikasi, kirim chat WhatsApp, cari YouTube, cari Google,
+ * telepon, pengingat, Bluetooth, tangkap layar, tanya AI.
  */
 class PemrosesPerintah(private val context: Context) {
 
@@ -75,6 +76,23 @@ class PemrosesPerintah(private val context: Context) {
             val persen = bm?.getIntProperty(android.os.BatteryManager.BATTERY_PROPERTY_CAPACITY) ?: -1
             return if (persen >= 0) Hasil.Selesai("Baterai " + persen + " persen")
             else Hasil.Bicara("Level baterai tidak bisa dibaca")
+        }
+
+        // Kontrol Bluetooth sesuai spesifikasi 13.
+        if (bersih.contains("bluetooth")) {
+            val pengelola = PengelolaBluetooth(context)
+            if (!pengelola.izin()) {
+                return Hasil.Bicara("Izin Bluetooth belum diberikan. Buka aplikasi Nazeio lalu berikan izin Bluetooth")
+            }
+            return when {
+                bersih.contains("nyalakan") || bersih.contains("hidupkan") ->
+                    if (pengelola.nyalakan()) Hasil.Selesai("Menyalakan Bluetooth")
+                    else Hasil.Bicara("Bluetooth tidak bisa dinyalakan")
+                bersih.contains("matikan") || bersih.contains("matikan bluetooth") ->
+                    if (pengelola.matikan()) Hasil.Selesai("Mematikan Bluetooth")
+                    else Hasil.Bicara("Bluetooth tidak bisa dimatikan")
+                else -> Hasil.Selesai(pengelola.status())
+            }
         }
 
         // Tanggal dan hari sesuai spesifikasi 09, dijawab lokal tanpa internet.
@@ -160,7 +178,7 @@ class PemrosesPerintah(private val context: Context) {
             if (tujuan.isBlank()) return Hasil.Bicara("Mau menelepon siapa")
             val pemanggil = PemanggilTelepon(context)
             // Nomor langsung, misalnya telepon 08123456789.
-            if (Regex("^\\d{3,}$").matches(tujuan)) {
+            if (Regex("\\d{3,}$").matches(tujuan)) {
                 return if (pemanggil.bukaDialer(tujuan)) Hasil.Selesai("Membuka dialer")
                 else Hasil.Bicara("Dialer tidak bisa dibuka")
             }
@@ -185,6 +203,20 @@ class PemrosesPerintah(private val context: Context) {
                 Hasil.Selesai("Membuka dialer untuk " + kontak.nama)
             } else {
                 Hasil.Bicara("Dialer tidak bisa dibuka")
+            }
+        }
+
+        // Tangkap layar sesuai spesifikasi 14.
+        if (bersih.contains("tangkap layar") || bersih.contains("tangkap layarnya") ||
+            bersih.contains("screenshot")
+        ) {
+            return when {
+                !LayananTangkapan.aktif(context) -> {
+                    LayananTangkapan.bukaPengaturan(context)
+                    Hasil.Bicara("Buka pengaturan aksesibilitas lalu nyalakan layanan Nazeio")
+                }
+                LayananTangkapan.tangkap() -> Hasil.Selesai("Layar ditangkap")
+                else -> Hasil.Bicara("Tangkapan layar tidak didukung perangkat ini")
             }
         }
 

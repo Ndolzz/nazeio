@@ -4,12 +4,15 @@ import android.app.AlarmManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import com.nazeio.app.PenerimaPengingat
 
 /**
  * Repositori pengingat sesuai spesifikasi 07.
  * Alarm dipasang lewat AlarmManager dan dicatat di Room sehingga
  * bisa dipasang ulang setelah HP dinyalakan kembali.
+ * Alarm dipasang presisi bila sistem mengizinkan, dengan alarm
+ * biasa sebagai cadangan.
  */
 class RepositoriPengingat(private val context: Context) {
 
@@ -32,7 +35,14 @@ class RepositoriPengingat(private val context: Context) {
                 context, kode, niat,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
-            am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, waktu, pi)
+            // Alarm presisi bila diizinkan sistem. Tanpa izin itu di Android 12
+            // ke atas, alarm biasa dipakai sebagai cadangan supaya pengingat
+            // tetap dipasang, walau waktunya bisa meleset beberapa menit.
+            if (Build.VERSION.SDK_INT >= 31 && !am.canScheduleExactAlarms()) {
+                am.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, waktu, pi)
+            } else {
+                am.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, waktu, pi)
+            }
             true
         } catch (e: Exception) {
             false
@@ -46,7 +56,8 @@ class RepositoriPengingat(private val context: Context) {
             val niat = Intent(context, PenerimaPengingat::class.java)
                 .putExtra(PenerimaPengingat.EXTRA_ID, kode)
             val pi = PendingIntent.getBroadcast(
-                context, kode, niat, PendingIntent.FLAG_IMMUTABLE
+                context, kode, niat,
+                PendingIntent.FLAG_IMMUTABLE
             )
             am.cancel(pi)
             true

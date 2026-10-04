@@ -11,4 +11,5 @@
     <string name="w_chip_bluetooth">Bluetooth</string>
     <string name="w_chip_wa">WhatsApp</string>
     <string name="w_silakan">Silakan bicara</string>
+    <string name="desc_tangkap_layar">Layanan Nazeio untuk menangkap layar dengan perintah suara.</string>
 </resources>
