@@ -21,7 +21,7 @@
         android:label="@string/app_name"
         android:icon="@mipmap/ic_launcher"
         android:theme="@style/Theme.Nazeio"
-        android:allowBackup="true">
+        android:allowBackup="false">
 
         <activity
             android:name=".MainActivity"
@@ -36,6 +36,39 @@
             android:name=".LayananSiaga"
             android:exported="false"
             android:foregroundServiceType="microphone" />
+
+        <receiver
+            android:name=".widget.WidgetKecil"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/info_widget_kecil" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WidgetPanjang"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/info_widget_panjang" />
+        </receiver>
+
+        <receiver
+            android:name=".widget.WidgetBesar"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/info_widget_besar" />
+        </receiver>
 
     </application>
 

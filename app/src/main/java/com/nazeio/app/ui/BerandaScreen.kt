@@ -55,6 +55,7 @@ import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
 import com.nazeio.app.AksiPengaturan
 import com.nazeio.app.KlienModel
+import com.nazeio.app.ControlLayanan
 import com.nazeio.app.LayananSiaga
 import com.nazeio.app.NormalisasiTeks
 import com.nazeio.app.PeluncurAplikasi
@@ -64,6 +65,7 @@ import com.nazeio.app.PengenalSuara
 import com.nazeio.app.Riwayat
 import com.nazeio.app.data.Pengaturan
 import com.nazeio.app.data.RepositoriAlias
+import com.nazeio.app.widget.StatusBersama
 import kotlinx.coroutines.launch
 
 /**
@@ -77,7 +79,9 @@ fun BerandaScreen() {
     var status by remember { mutableStateOf("Siap") }
     var jawaban by remember { mutableStateOf("") }
     var mendengar by remember { mutableStateOf(false) }
-    var siaga by remember { mutableStateOf(false) }
+    // Status siaga dibagi dengan layanan, widget, dan layar Pengaturan.
+    val siaga = StatusBersama.status != StatusBersama.Status.MATI
+    var mauSiaga by remember { mutableStateOf(false) }
     var adaIzin by remember {
         mutableStateOf(
             ContextCompat.checkSelfPermission(
@@ -100,6 +104,7 @@ fun BerandaScreen() {
         ActivityResultContracts.RequestMultiplePermissions()
     ) { hasil ->
         adaIzin = hasil[Manifest.permission.RECORD_AUDIO] == true
+        if (adaIzin && mauSiaga) ControlLayanan.nyalakan(context)
     }
 
     fun prosesTeks(t: String) {
@@ -312,7 +317,7 @@ fun BerandaScreen() {
                 Switch(
                     checked = siaga,
                     onCheckedChange = { nyala ->
-                        siaga = nyala
+                        mauSiaga = nyala
                         if (nyala) {
                             if (!adaIzin) {
                                 izinLauncher.launch(
@@ -322,12 +327,10 @@ fun BerandaScreen() {
                                     )
                                 )
                             } else {
-                                context.startForegroundService(
-                                    Intent(context, LayananSiaga::class.java)
-                                )
+                                ControlLayanan.nyalakan(context)
                             }
                         } else {
-                            context.stopService(Intent(context, LayananSiaga::class.java))
+                            ControlLayanan.matikan(context)
                         }
                     }
                 )

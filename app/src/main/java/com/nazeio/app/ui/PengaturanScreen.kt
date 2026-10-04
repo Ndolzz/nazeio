@@ -53,8 +53,11 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat
+import com.nazeio.app.ControlLayanan
 import com.nazeio.app.LayananSiaga
 import com.nazeio.app.data.Pengaturan
+import com.nazeio.app.widget.PembaruWidget
+import com.nazeio.app.widget.StatusBersama
 import kotlin.math.abs
 import kotlin.math.sin
 
@@ -75,7 +78,7 @@ fun PengaturanScreen() {
     var penyedia by remember { mutableStateOf(pengaturan.penyediaApi) }
     var kunci by remember { mutableStateOf(pengaturan.kunciApi) }
     var batas by remember { mutableStateOf(pengaturan.batasHarian.toFloat()) }
-    var siaga by remember { mutableStateOf(false) }
+    val siaga = StatusBersama.status != StatusBersama.Status.MATI
 
     var izinMikrofon by remember { mutableStateOf(adaIzinMikrofon(context)) }
     val izinLauncher = rememberLauncherForActivityResult(
@@ -83,12 +86,10 @@ fun PengaturanScreen() {
     ) { izinMikrofon = adaIzinMikrofon(context) }
 
     fun nyalakanSiaga(nyala: Boolean) {
-        siaga = nyala
         if (nyala) {
             if (izinMikrofon) {
-                context.startForegroundService(Intent(context, LayananSiaga::class.java))
+                ControlLayanan.nyalakan(context)
             } else {
-                siaga = false
                 izinLauncher.launch(
                     arrayOf(
                         Manifest.permission.RECORD_AUDIO,
@@ -97,7 +98,7 @@ fun PengaturanScreen() {
                 )
             }
         } else {
-            context.stopService(Intent(context, LayananSiaga::class.java))
+            ControlLayanan.matikan(context)
         }
     }
 
@@ -129,6 +130,7 @@ fun PengaturanScreen() {
                     saatKlik = {
                         gaya = nama
                         pengaturan.gayaAnimasi = nama
+                        PembaruWidget.penuh(context)
                     },
                     modifier = Modifier.weight(1f)
                 )
@@ -141,6 +143,7 @@ fun PengaturanScreen() {
             ubah = {
                 hemat = it
                 pengaturan.hematBaterai = it
+                PembaruWidget.penuh(context)
             }
         )
 

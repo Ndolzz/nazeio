@@ -18,6 +18,7 @@ import com.nazeio.app.ui.NavigasiBawah
 import com.nazeio.app.ui.NazeioTheme
 import com.nazeio.app.ui.PengaturanScreen
 import com.nazeio.app.ui.RiwayatScreen
+import com.nazeio.app.widget.StatusBersama
 
 /**
  * Aktivitas utama: empat tab bawah sesuai desain
@@ -27,6 +28,7 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        StatusBersama.muat(this)
         setContent {
             NazeioTheme {
                 var tab by remember { mutableIntStateOf(0) }

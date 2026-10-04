@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <color name="ic_launcher_background">#2563EB</color>
+
+    <color name="w_latar">#FFFFFF</color>
+    <color name="w_kartu">#F8FAFC</color>
+    <color name="w_garis">#E2E8F0</color>
+    <color name="w_teks">#0F172A</color>
+    <color name="w_redup">#64748B</color>
+    <color name="w_biru">#2563EB</color>
+    <color name="w_ungu">#7C3AED</color>
+    <color name="w_merah">#DC2626</color>
 </resources>

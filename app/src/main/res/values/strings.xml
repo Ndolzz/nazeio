@@ -1,4 +1,14 @@
-<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Nazeio</string>
+    <string name="desc_siaga">Mode siaga</string>
+    <string name="desc_orb">Bicara dengan Nazeio</string>
+    <string name="widget_kecil_deskripsi">Mikrofon Nazeio, ukuran 2 x 2</string>
+    <string name="widget_panjang_deskripsi">Mikrofon Nazeio, ukuran 4 x 1</string>
+    <string name="widget_besar_deskripsi">Mikrofon Nazeio dengan pintasan, ukuran 4 x 2</string>
+    <string name="w_hint_mati">Nyalakan mode siaga untuk memakai kata Nazeio.</string>
+    <string name="w_nyalakan">Nyalakan</string>
+    <string name="w_chip_aplikasi">Buka aplikasi</string>
+    <string name="w_chip_bluetooth">Bluetooth</string>
+    <string name="w_chip_wa">WhatsApp</string>
+    <string name="w_silakan">Silakan bicara</string>
 </resources>

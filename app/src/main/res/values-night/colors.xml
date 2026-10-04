@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="w_latar">#0F172A</color>
+    <color name="w_kartu">#162033</color>
+    <color name="w_garis">#243049</color>
+    <color name="w_teks">#F1F5F9</color>
+    <color name="w_redup">#94A3B8</color>
+</resources>
