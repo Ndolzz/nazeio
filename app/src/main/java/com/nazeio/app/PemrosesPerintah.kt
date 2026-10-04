@@ -59,6 +59,24 @@ class PemrosesPerintah(private val context: Context) {
             else Hasil.Bicara("Level baterai tidak bisa dibaca")
         }
 
+        // Tanggal dan hari sesuai spesifikasi 09, dijawab lokal tanpa internet.
+        if (bersih.contains("hari apa")) {
+            return Hasil.Selesai("Hari ini hari " + TanyaWaktu.namaHari(System.currentTimeMillis()))
+        }
+        if (bersih.contains("tanggal berapa") || bersih.contains("tanggal sekarang")) {
+            return Hasil.Selesai("Hari ini " + TanyaWaktu.tanggal(System.currentTimeMillis()))
+        }
+        if (bersih.contains("berapa hari lagi")) {
+            val selisih = TanyaWaktu.hariMenuju(bersih, System.currentTimeMillis())
+            return when {
+                selisih == null -> Hasil.Bicara(
+                    "Sampai tanggal berapa. Contoh, berapa hari lagi sampai 25 desember"
+                )
+                selisih == 0 -> Hasil.Selesai("Sudah hari ini")
+                else -> Hasil.Selesai(selisih.toString() + " hari lagi")
+            }
+        }
+
         // Pengingat.
         if (bersih.contains("ingatkan")) {
             val waktu = PengingatWaktu.dariUcapan(bersih, System.currentTimeMillis())
@@ -113,7 +131,8 @@ class PemrosesPerintah(private val context: Context) {
             if (!pemanggil.izinKontak()) {
                 return Hasil.Bicara("Izin kontak belum diberikan. Buka aplikasi Nazeio lalu berikan izin kontak")
             }
-            val kontak = pemanggil.cariKontak(tujuan)
+            // Kandidat disaring dengan kandungan nama lalu dipilih yang paling mirip.
+            val kontak = PencocokKontak.pilih(tujuan, pemanggil.cariKontak(tujuan))
             if (kontak.isEmpty()) return Hasil.Bicara("Kontak tidak ditemukan")
             if (kontak.size > 1) {
                 return Hasil.Bicara(

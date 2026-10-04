@@ -1,0 +1,51 @@
+# Nazeio
+
+Nazeio adalah asisten suara pribadi untuk Android. Aplikasi mendengarkan kata pemicu Nazeio, lalu menjalankan perintah suara dalam bahasa Indonesia dan menjawab dengan suara.
+
+## Fitur
+
+1. Mode siaga dengan kata pemicu Nazeio. Percakapan berlanjut sampai pengguna diam 8 detik, berkata selesai, atau menekan tombol berhenti.
+2. Buka aplikasi dengan pencocokan nama tahan salah ucap. Kecocokan di bawah 0,9 dimintai konfirmasi lisan.
+3. Buka panel pengaturan lewat alias suara yang tersimpan sebagai data.
+4. Buka WhatsApp dan cari di YouTube.
+5. Tanya jawab dengan Gemini atau Claude memakai kunci API milik pengguna. Kunci disimpan terenkripsi dan ada batas pemakaian harian.
+6. Tiga widget berukuran 2 x 2, 4 x 1, dan 4 x 2 dengan status Mati, Siaga, dan Aktif.
+7. Pengingat suara, misalnya ingatkan aku lima menit lagi, atau pukul 7.
+8. Telepon lewat dialer dengan nama kontak atau nomor. Aplikasi tidak pernah menelepon langsung.
+9. Pertanyaan lokal tanpa internet: jam, hari, tanggal, baterai, dan hitungan hari menuju tanggal tertentu.
+
+## Batasan
+
+1. Android 11 ke atas.
+2. Target utama HP ARMv7 32 bit.
+3. Bahasa utama Indonesia.
+
+## Cara Build
+
+Butuh JDK 17.
+
+1. Jalankan gradle wrapper bila belum ada, lalu ./gradlew assembleDebug.
+2. APK debug ada di app/build/outputs/apk/debug.
+3. CI GitHub Actions membangun APK dan menjalankan tes unit pada setiap push ke main, hasilnya tersimpan sebagai artifact.
+
+## Struktur Repositori
+
+1. specs berisi spesifikasi tiap fitur, satu berkas untuk satu fitur.
+2. desain berisi rancangan tampilan dalam HTML.
+3. CATATAN_WIDGET.md berisi catatan rilis versi 0.5.0.
+
+## Spesifikasi
+
+1. 01_buka_aplikasi.md
+2. 02_alias.md
+3. 03_tanya_jawab.md
+4. 04_tugas_agen.md
+5. 05_pemicu_suara.md
+6. 06_widget_dan_animasi.md
+7. 07_pengingat.md
+8. 08_telepon.md
+9. 09_waktu_tanggal.md
+
+## Lisensi
+
+Kode dalam repositori ini dilisensikan di bawah MIT. Lihat berkas LICENSE.
