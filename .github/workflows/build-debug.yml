@@ -1,0 +1,52 @@
+name: Build Debug APK
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build debug APK
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kode
+        uses: actions/checkout@v4
+
+      - name: Pasang JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Pasang Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Cek project Gradle
+        id: cek
+        run: |
+          if [ ! -f "./gradlew" ] && [ ! -f "app/build.gradle.kts" ] && [ ! -f "app/build.gradle" ]; then
+            echo "ada=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "ada=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Set izin gradlew
+        if: steps.cek.outputs.ada == 'true'
+        run: chmod +x ./gradlew
+
+      - name: Build debug APK
+        if: steps.cek.outputs.ada == 'true'
+        run: ./gradlew assembleDebug --stacktrace
+
+      - name: Upload APK sebagai artifact
+        if: steps.cek.outputs.ada == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nazeio-debug-apk
+          path: app/build/outputs/apk/debug/*.apk
+          retention-days: 14
+
+      - name: Info bila project belum ada
+        if: steps.cek.outputs.ada == 'false'
+        run: echo "Project Android belum ada di repositori. Workflow ini otomatis build APK setelah project Android di-push."
