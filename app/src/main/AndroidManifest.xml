@@ -50,8 +50,7 @@
             </intent-filter>
             <meta-data
                 android:name="android.appwidget.provider"
-                android:resource="@xml/inf
-o_widget_kecil" />
+                android:resource="@xml/info_widget_kecil" />
         </receiver>
 
         <receiver

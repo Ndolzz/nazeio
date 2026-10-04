@@ -48,8 +48,7 @@ class PemrosesPerintah(private val context: Context) {
 
         // Pertanyaan lokal tanpa internet: jam dan baterai.
         if (bersih == "jam berapa" || bersih == "pukul berapa" || bersih == "jam sekarang") {
-            v
-al jam = java.text.SimpleDateFormat("HH:mm", java.util.Locale("id", "ID"))
+            val jam = java.text.SimpleDateFormat("HH:mm", java.util.Locale("id", "ID"))
                 .format(java.util.Date())
             return Hasil.Selesai("Sekarang jam " + jam)
         }
@@ -90,8 +89,7 @@ al jam = java.text.SimpleDateFormat("HH:mm", java.util.Locale("id", "ID"))
                 .replace("kirim pesan", "")
                 .replace("kirim wa", "")
                 .trim()
-            
-val appWa = peluncur.daftarAplikasi().firstOrNull { it.label.contains("WhatsApp", true) }
+            val appWa = peluncur.daftarAplikasi().firstOrNull { it.label.contains("WhatsApp", true) }
             return if (appWa != null && peluncur.buka(appWa)) {
                 if (tujuan.isBlank()) Hasil.Selesai("WhatsApp dibuka")
                 else Hasil.Selesai("WhatsApp dibuka untuk " + tujuan)
@@ -167,8 +165,7 @@ val appWa = peluncur.daftarAplikasi().firstOrNull { it.label.contains("WhatsApp"
         val jawab = klien.tanya(pertanyaan)
         return when (jawab) {
             is KlienModel.Hasil.Sukses ->
-           
-     Hasil.Selesai(Pembicara.ringkasUntukBaca(jawab.jawaban))
+                Hasil.Selesai(Pembicara.ringkasUntukBaca(jawab.jawaban))
             is KlienModel.Hasil.Gagal -> {
                 if (bukaAplikasiAi(context)) {
                     Hasil.Selesai("Belum ada kunci API. Membuka aplikasi AI")
@@ -220,8 +217,7 @@ val appWa = peluncur.daftarAplikasi().firstOrNull { it.label.contains("WhatsApp"
         }
     }
 
-    companion objec
-t {
+    companion object {
         fun bukaAplikasiAi(context: Context): Boolean {
             val peluncur = PeluncurAplikasi(context)
             val target = peluncur.daftarAplikasi().firstOrNull {
