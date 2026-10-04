@@ -1,15 +1,23 @@
 package com.nazeio.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -30,17 +38,19 @@ import com.nazeio.app.data.RepositoriAlias
 import kotlinx.coroutines.launch
 
 /**
- * Layar Alias sesuai spesifikasi 02:
- * melihat, menambah, dan menghapus alias.
+ * Layar Alias sesuai desain: pencarian, kelompok aksi
+ * dengan tag alias, dan tombol tambah alias.
  */
 @Composable
-fun AliasScreen(kembali: () -> Unit) {
+fun AliasScreen() {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val repositori = remember { RepositoriAlias(context) }
     var daftar by remember { mutableStateOf(listOf<com.nazeio.app.data.AliasEntity>()) }
-    var aliasBaru by remember { mutableStateOf("") }
+    var cari by remember { mutableStateOf("") }
+    var bukaDialog by remember { mutableStateOf(false) }
     var aksiBaru by remember { mutableStateOf("") }
+    var aliasBaru by remember { mutableStateOf("") }
 
     fun muat() {
         scope.launch {
@@ -51,91 +61,127 @@ fun AliasScreen(kembali: () -> Unit) {
 
     remember { muat(); true }
 
+    val kelompok = daftar
+        .filter { it.alias.contains(cari, true) || it.aksi.contains(cari, true) }
+        .groupBy { it.aksi }
+        .map { (aksi, list) -> aksi to list.map { it.alias } }
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(20.dp)
+            .padding(horizontal = 20.dp)
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = "Alias",
-                fontSize = 24.sp,
-                fontWeight = FontWeight.Bold,
-                modifier = Modifier.weight(1f)
-            )
-            TextButton(onClick = kembali) { Text("Kembali") }
-        }
+        Spacer(Modifier.height(16.dp))
+        Text("Alias", fontSize = 24.sp, fontWeight = FontWeight.Bold)
+        Text(
+            "Satu aksi, banyak sebutan.",
+            fontSize = 13.sp,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
-        Row(
+        OutlinedTextField(
+            value = cari,
+            onValueChange = { cari = it },
+            placeholder = { Text("Cari alias") },
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            OutlinedTextField(
-                value = aksiBaru,
-                onValueChange = { aksiBaru = it },
-                label = { Text("Aksi") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-            OutlinedTextField(
-                value = aliasBaru,
-                onValueChange = { aliasBaru = it },
-                label = { Text("Alias baru") },
-                modifier = Modifier.weight(1f),
-                singleLine = true
-            )
-        }
-        TextButton(
-            onClick = {
-                if (aksiBaru.isNotBlank() && aliasBaru.isNotBlank()) {
-                    scope.launch {
-                        repositori.tambahAlias(aksiBaru.trim(), aliasBaru.trim())
-                        aliasBaru = ""
-                        muat()
-                    }
-                }
-            },
-            modifier = Modifier.padding(top = 4.dp)
-        ) { Text("Tambah alias") }
+            singleLine = true
+        )
 
         LazyColumn(
             modifier = Modifier
                 .fillMaxWidth()
+                .weight(1f)
                 .padding(top = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(daftar, key = { it.id }) { item ->
-                Card(modifier = Modifier.fillMaxWidth()) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 14.dp, vertical = 10.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(text = item.alias, fontSize = 15.sp)
-                            Text(
-                                text = item.aksi,
-                                fontSize = 12.sp,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                        }
-                        TextButton(onClick = {
-                            scope.launch {
-                                repositori.hapus(item.id)
-                                muat()
+            items(kelompok.size) { i ->
+                val (aksi, tag) = kelompok[i]
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Column(Modifier.padding(16.dp)) {
+                        Text(
+                            aksi.replace("panel_", "").replace("_", " ")
+                                .replaceFirstChar { it.uppercase() },
+                            fontWeight = FontWeight.SemiBold,
+                            fontSize = 15.sp
+                        )
+                        Row(
+                            modifier = Modifier
+                                .padding(top = 8.dp)
+                                .horizontalScroll(rememberScrollState()),
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            tag.forEach { t ->
+                                Text(
+                                    t,
+                                    fontSize = 12.sp,
+                                    color = Warna.Biru,
+                                    modifier = Modifier
+                                        .background(Color0xEAF1FF(), RoundedCornerShape(20.dp))
+                                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                                )
                             }
-                        }) { Text("Hapus") }
+                        }
                     }
                 }
             }
         }
+
+        Button(
+            onClick = { bukaDialog = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 12.dp)
+        ) { Text("Tambah alias") }
+    }
+
+    if (bukaDialog) {
+        AlertDialog(
+            onDismissRequest = { bukaDialog = false },
+            title = { Text("Tambah alias") },
+            text = {
+                Column {
+                    OutlinedTextField(
+                        value = aksiBaru,
+                        onValueChange = { aksiBaru = it },
+                        label = { Text("Nama aksi, contoh panel_bluetooth") },
+                        singleLine = true
+                    )
+                    OutlinedTextField(
+                        value = aliasBaru,
+                        onValueChange = { aliasBaru = it },
+                        label = { Text("Alias baru") },
+                        singleLine = true,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    if (aksiBaru.isNotBlank() && aliasBaru.isNotBlank()) {
+                        scope.launch {
+                            repositori.tambahAlias(aksiBaru.trim(), aliasBaru.trim())
+                            aksiBaru = ""
+                            aliasBaru = ""
+                            bukaDialog = false
+                            muat()
+                        }
+                    }
+                }) { Text("Simpan") }
+            },
+            dismissButton = {
+                TextButton(onClick = { bukaDialog = false }) { Text("Batal") }
+            }
+        )
     }
 }
+
+private fun Color0xEAF1FF() = androidx.compose.ui.graphics.Color(0xFFEAF1FF)
