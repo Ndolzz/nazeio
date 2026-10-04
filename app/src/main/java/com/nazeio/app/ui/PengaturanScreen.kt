@@ -25,11 +25,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
@@ -44,6 +41,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.rotate
@@ -61,6 +61,10 @@ import kotlin.math.sin
 /**
  * Layar Pengaturan sesuai desain: bagian Tampilan dengan
  * pratinjau gaya animasi, Siaga, Suara, Izin, dan API.
+ *
+ * Catatan: drawscope.rotate dipakai di dalam Canvas,
+ * sedangkan Modifier.rotate (impor di atas) untuk memutar
+ * seluruh badan kipas.
  */
 @Composable
 fun PengaturanScreen() {
@@ -309,7 +313,10 @@ private fun PratinjauAnimasi(
             .padding(8.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(modifier = Modifier.size(width = 64.dp, height = 52.dp), contentAlignment = Alignment.Center) {
+        Box(
+            modifier = Modifier.size(width = 64.dp, height = 52.dp),
+            contentAlignment = Alignment.Center
+        ) {
             BadanAnimasi(gaya = nama, hemat = hemat)
         }
         Text(
@@ -324,7 +331,8 @@ private fun PratinjauAnimasi(
 
 /**
  * Badan animasi sesuai gaya: gelombang batang, kipas berputar,
- * atau lingkaran badai.
+ * atau lingkaran badai. rotate di dalam Canvas berasal dari
+ * drawscope, sedangkan Modifier.rotate memutar seluruh kipas.
  */
 @Composable
 private fun BadanAnimasi(gaya: String, hemat: Boolean, modifier: Modifier = Modifier) {
@@ -338,31 +346,22 @@ private fun BadanAnimasi(gaya: String, hemat: Boolean, modifier: Modifier = Modi
 
     when (gaya) {
         "kipas" -> {
-            androidx.compose.ui.draw.rotate(
-                degrees = if (hemat) fase * 60f else fase * 360f
+            Canvas(
+                modifier = modifier
+                    .size(48.dp)
+                    .rotate(if (hemat) fase * 60f else fase * 360f)
             ) {
-                Canvas(modifier = modifier.size(48.dp)) {
-                    val lebar = size.minDimension
-                    repeat(3) { i ->
-                        rotate(i * 120f) {
-                            drawOval(
-                                color = Warna.Biru,
-                                topLeft = androidx.compose.ui.geometry.Offset(
-                                    lebar * 0.42f,
-                                    lebar * 0.06f
-                                ),
-                                size = androidx.compose.ui.geometry.Size(
-                                    lebar * 0.16f,
-                                    lebar * 0.44f
-                                )
-                            )
-                        }
+                val lebar = size.minDimension
+                repeat(3) { i ->
+                    rotate(i * 120f) {
+                        drawOval(
+                            color = Warna.Biru,
+                            topLeft = Offset(lebar * 0.42f, lebar * 0.06f),
+                            size = Size(lebar * 0.16f, lebar * 0.44f)
+                        )
                     }
-                    drawCircle(
-                        color = Warna.Ungu,
-                        radius = lebar * 0.08f
-                    )
                 }
+                drawCircle(color = Warna.Ungu, radius = lebar * 0.08f)
             }
         }
         "badai" -> {
