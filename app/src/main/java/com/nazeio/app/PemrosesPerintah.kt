@@ -21,9 +21,6 @@ class PemrosesPerintah(private val context: Context) {
     /** Nama aplikasi yang menunggu jawaban konfirmasi pengguna. */
     private var konfirmasiTertunda: String? = null
 
-    /** Nama aplikasi yang menunggu jawaban konfirmasi pengguna. */
-    private var konfirmasiTertunda: String? = null
-
     sealed class Hasil {
         data class Selesai(val pesan: String) : Hasil()
         data class Bicara(val pesan: String) : Hasil()
