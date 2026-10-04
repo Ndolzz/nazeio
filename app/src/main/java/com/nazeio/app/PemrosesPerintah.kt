@@ -48,7 +48,8 @@ class PemrosesPerintah(private val context: Context) {
 
         // Pertanyaan lokal tanpa internet: jam dan baterai.
         if (bersih == "jam berapa" || bersih == "pukul berapa" || bersih == "jam sekarang") {
-            val jam = java.text.SimpleDateFormat("HH:mm", java.util.Locale("id", "ID"))
+            v
+al jam = java.text.SimpleDateFormat("HH:mm", java.util.Locale("id", "ID"))
                 .format(java.util.Date())
             return Hasil.Selesai("Sekarang jam " + jam)
         }
@@ -89,12 +90,42 @@ class PemrosesPerintah(private val context: Context) {
                 .replace("kirim pesan", "")
                 .replace("kirim wa", "")
                 .trim()
-            val appWa = peluncur.daftarAplikasi().firstOrNull { it.label.contains("WhatsApp", true) }
+            
+val appWa = peluncur.daftarAplikasi().firstOrNull { it.label.contains("WhatsApp", true) }
             return if (appWa != null && peluncur.buka(appWa)) {
                 if (tujuan.isBlank()) Hasil.Selesai("WhatsApp dibuka")
                 else Hasil.Selesai("WhatsApp dibuka untuk " + tujuan)
             } else {
                 Hasil.Bicara("WhatsApp tidak terpasang")
+            }
+        }
+
+        // Telepon sesuai spesifikasi 08.
+        if (bersih == "telepon" || bersih.startsWith("telepon ") ||
+            bersih == "panggil" || bersih.startsWith("panggil ")
+        ) {
+            val tujuan = bersih.removePrefix("telepon").removePrefix("panggil").trim()
+            if (tujuan.isBlank()) return Hasil.Bicara("Mau menelepon siapa")
+            val pemanggil = PemanggilTelepon(context)
+            // Nomor langsung, misalnya telepon 08123456789.
+            if (Regex("^\\d{3,}$").matches(tujuan)) {
+                return if (pemanggil.bukaDialer(tujuan)) Hasil.Selesai("Membuka dialer")
+                else Hasil.Bicara("Dialer tidak bisa dibuka")
+            }
+            if (!pemanggil.izinKontak()) {
+                return Hasil.Bicara("Izin kontak belum diberikan. Buka aplikasi Nazeio lalu berikan izin kontak")
+            }
+            val kontak = pemanggil.cariKontak(tujuan)
+            if (kontak.isEmpty()) return Hasil.Bicara("Kontak tidak ditemukan")
+            if (kontak.size > 1) {
+                return Hasil.Bicara(
+                    "Ada beberapa yang mirip: " + kontak.take(3).joinToString(", ") { it.nama }
+                )
+            }
+            return if (pemanggil.bukaDialer(kontak[0].nomor)) {
+                Hasil.Selesai("Membuka dialer untuk " + kontak[0].nama)
+            } else {
+                Hasil.Bicara("Dialer tidak bisa dibuka")
             }
         }
 
@@ -136,7 +167,8 @@ class PemrosesPerintah(private val context: Context) {
         val jawab = klien.tanya(pertanyaan)
         return when (jawab) {
             is KlienModel.Hasil.Sukses ->
-                Hasil.Selesai(Pembicara.ringkasUntukBaca(jawab.jawaban))
+           
+     Hasil.Selesai(Pembicara.ringkasUntukBaca(jawab.jawaban))
             is KlienModel.Hasil.Gagal -> {
                 if (bukaAplikasiAi(context)) {
                     Hasil.Selesai("Belum ada kunci API. Membuka aplikasi AI")
@@ -188,7 +220,8 @@ class PemrosesPerintah(private val context: Context) {
         }
     }
 
-    companion object {
+    companion objec
+t {
         fun bukaAplikasiAi(context: Context): Boolean {
             val peluncur = PeluncurAplikasi(context)
             val target = peluncur.daftarAplikasi().firstOrNull {

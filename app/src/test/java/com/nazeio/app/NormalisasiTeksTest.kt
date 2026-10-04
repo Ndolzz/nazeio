@@ -23,4 +23,10 @@ class NormalisasiTeksTest {
         assertEquals("wa", NormalisasiTeks.normalisasi("WA."))
         assertEquals("whatsapp web", NormalisasiTeks.normalisasi("WhatsApp-Web"))
     }
+
+    @Test
+    fun kataBukanDanBuatDipertahankan() {
+        assertEquals("bukan youtube", NormalisasiTeks.normalisasi("bukan youtube"))
+        assertEquals("buat pengingat", NormalisasiTeks.normalisasi("buat pengingat"))
+    }
 }

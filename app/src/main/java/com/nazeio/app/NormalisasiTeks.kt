@@ -6,9 +6,10 @@ package com.nazeio.app
  */
 object NormalisasiTeks {
 
+    // bukan dan buat tidak dibuang lagi karena sering menjadi bagian perintah.
     private val KATA_PENGANTAR = setOf(
-        "tolong", "buka", "bukakan", "bukan", "aplikasi", "nazeio", "coba",
-        "mohon", "dong", "please", "buat"
+        "tolong", "buka", "bukakan", "aplikasi", "nazeio", "coba",
+        "mohon", "dong", "please"
     )
 
     fun normalisasi(teks: String): String {
