@@ -9,8 +9,12 @@ object PemicuKata {
     data class Hasil(val ada: Boolean, val sisa: String)
 
     private const val KATA = "nazeio"
-    private const val AMBANG = 0.85
-    private val ALIAS = setOf("nasyo", "nasio", "naseo")
+    private const val AMBANG = 0.82
+    private val ALIAS = setOf(
+        "nezio", "nasyo", "nasio", "naseo", "najio", "nazio", "nazyo",
+        "nexio", "nenzio", "neziio", "neziyo", "nesio", "negio", "nozio",
+        "nazeo", "naezio"
+    )
     private val KATA_AKHIR = setOf("selesai", "terima kasih", "sudah cukup", "cukup")
 
     private fun pecah(teks: String): List<String> =
