@@ -45,7 +45,7 @@ class PemrosesPerintah(private val context: Context) {
             if (bersih == "iya" || bersih == "ya" || bersih == "benar" || bersih == "buka") {
                 val app = peluncur.daftarAplikasi().firstOrNull { it.label == tertunda }
                 return if (app != null && peluncur.buka(app)) Hasil.Selesai("Membuka " + app.label)
-                else Hasil.Bicara("Aplikasi tidak ditemukan")
+                else Hasil.Bicara("Aplikasi tidak bisa dibuka")
             }
             // Bukan jawaban konfirmasi, lanjut memproses ucapan baru.
         }
@@ -286,7 +286,7 @@ class PemrosesPerintah(private val context: Context) {
             }
             val app = daftar.first { it.label == nama }
             return if (peluncur.buka(app)) Hasil.Selesai("Membuka " + app.label)
-            else Hasil.Bicara("Aplikasi tidak ditemukan")
+            else Hasil.Bicara("Aplikasi tidak bisa dibuka")
         }
         if (cocok.size > 1) {
             return Hasil.Bicara("Ada beberapa yang mirip: " + cocok.joinToString(", ") { it.first })

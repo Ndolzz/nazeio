@@ -1,8 +1,10 @@
 package com.nazeio.app
 
+import android.content.ActivityNotFoundException
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
+import android.util.Log
 
 data class AplikasiInfo(
     val label: String,
@@ -38,10 +40,20 @@ class PeluncurAplikasi(private val context: Context) {
 
     fun buka(aplikasi: AplikasiInfo): Boolean {
         return try {
-            context.startActivity(aplikasi.intentPeluncur)
+            context.startActivity(
+                aplikasi.intentPeluncur.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            )
             true
-        } catch (e: Exception) {
+        } catch (e: ActivityNotFoundException) {
+            Log.e(TAG, "Aktivitas peluncur tidak ditemukan: ${aplikasi.packageName}", e)
+            false
+        } catch (e: SecurityException) {
+            Log.e(TAG, "Tidak diizinkan membuka aplikasi: ${aplikasi.packageName}", e)
             false
         }
+    }
+
+    companion object {
+        private const val TAG = "PeluncurAplikasi"
     }
 }
