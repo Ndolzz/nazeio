@@ -16,6 +16,7 @@ import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.util.Log
 import android.widget.Toast
 import com.nazeio.app.data.RepositoriAlias
 import com.nazeio.app.widget.PembaruWidget
@@ -65,6 +66,10 @@ class LayananSiaga : Service() {
     // Bila offline ternyata tidak tersedia atau terus gagal, beralih ke online.
     private var pakaiOffline = true
 
+    // Diagnostik sementara: tampilkan di layar apa yang didengar dan galat apa
+    // yang muncul. Dimatikan setelah penyebab "Nazeio tidak mendengar" ketemu.
+    private var galatTerakhirToast = 0L
+
     private val batasDiam = Runnable {
         if (percakapan) akhiriPercakapan("Percakapan selesai")
     }
@@ -87,27 +92,39 @@ class LayananSiaga : Service() {
     override fun onCreate() {
         super.onCreate()
         aktif = true
+        Log.d(TAG, "onCreate")
         pemroses = PemrosesPerintah(this)
         penggerak = PenggerakWidget(this)
         tts = TextToSpeech(this) { hasil ->
+            Log.d(TAG, "TTS init: hasil=$hasil")
             ttsSiap = hasil == TextToSpeech.SUCCESS
-            if (ttsSiap) {
-                val id = Locale("id", "ID")
-                tts?.language = id
-                tts?.setOnUtteranceProgressListener(pendengarTts)
-                // Voice data Bahasa Indonesia belum terpasang: ingatkan pengguna
-                // agar Nazeio tidak menjawab dengan suara asing atau diam saja.
-                val tersedia = tts?.isLanguageAvailable(id) ?: TextToSpeech.LANG_NOT_SUPPORTED
-                if (tersedia == TextToSpeech.LANG_MISSING_DATA ||
-                    tersedia == TextToSpeech.LANG_NOT_SUPPORTED
-                ) {
-                    handler.post {
-                        Toast.makeText(
-                            this,
-                            "Suara Bahasa Indonesia belum terpasang. Pasang voice data Google di pengaturan agar Nazeio bisa menjawab.",
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
+            if (!ttsSiap) {
+                handler.post {
+                    Toast.makeText(
+                        this,
+                        "TTS gagal dimulai (kode $hasil). Nazeio tidak bisa bersuara.",
+                        Toast.LENGTH_LONG
+                    ).show()
+                }
+                return@TextToSpeech
+            }
+            val id = Locale("id", "ID")
+            val setLocale = tts?.setLanguage(id)
+            Log.d(TAG, "TTS setLanguage id-ID: $setLocale (0=OK, -1=missing, -2=not supported)")
+            tts?.setOnUtteranceProgressListener(pendengarTts)
+            // Voice data Bahasa Indonesia belum terpasang: ingatkan pengguna
+            // agar Nazeio tidak menjawab dengan suara asing atau diam saja.
+            val tersedia = tts?.isLanguageAvailable(id) ?: TextToSpeech.LANG_NOT_SUPPORTED
+            Log.d(TAG, "TTS isLanguageAvailable: $tersedia")
+            if (tersedia == TextToSpeech.LANG_MISSING_DATA ||
+                tersedia == TextToSpeech.LANG_NOT_SUPPORTED
+            ) {
+                handler.post {
+                    Toast.makeText(
+                        this,
+                        "Suara Bahasa Indonesia belum terpasang (kode $tersedia). Buka Pengaturan > TTS dan pasang voice data Bahasa Indonesia.",
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
             }
         }
@@ -116,6 +133,7 @@ class LayananSiaga : Service() {
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+        Log.d(TAG, "onStartCommand: aksi=${intent?.action}")
         buatKanal()
         if (!masukLatarDepan()) return START_NOT_STICKY
         when (intent?.action) {
@@ -142,6 +160,7 @@ class LayananSiaga : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        Log.d(TAG, "onDestroy")
         berjalan = false
         percakapan = false
         aktif = false
@@ -163,6 +182,7 @@ class LayananSiaga : Service() {
         startForeground(ID_NOTIF, notifikasi())
         true
     } catch (e: RuntimeException) {
+        Log.e(TAG, "startForeground ditolak", e)
         // Izin mikrofon belum ada, atau sistem menolak layanan latar depan.
         // Jangan gagal diam-diam: beri tahu pengguna penyebab paling umum.
         handler.post {
@@ -183,6 +203,7 @@ class LayananSiaga : Service() {
         berjalan = true
         pakaiOffline = true
         galatBerturut = 0
+        Log.d(TAG, "mulaiLayanan: siaga menyala")
         StatusBersama.set(this, Status.SIAGA)
         PembaruWidget.penuh(this)
         penggerak.mulai()
@@ -272,6 +293,7 @@ class LayananSiaga : Service() {
     private fun bicara(pesan: String) {
         handler.removeCallbacks(batasDiam)
         if (!ttsSiap) {
+            Log.e(TAG, "bicara dibatalkan: ttsSiap=false, pesan=$pesan")
             selesaiBicara()
             return
         }
@@ -280,6 +302,7 @@ class LayananSiaga : Service() {
         pengenal?.destroy()
         pengenal = null
         nomorUcapan++
+        Log.d(TAG, "bicara: $pesan")
         tts?.speak(pesan, TextToSpeech.QUEUE_FLUSH, null, nomorUcapan.toString())
     }
 
@@ -308,6 +331,7 @@ class LayananSiaga : Service() {
     private fun mulaiMendengar() {
         if (!berjalan || sedangBicara) return
         if (!SpeechRecognizer.isRecognitionAvailable(this)) {
+            Log.e(TAG, "mulaiMendengar: pengenal suara tidak tersedia")
             Toast.makeText(this, "Pengenal suara tidak tersedia di perangkat ini", Toast.LENGTH_LONG).show()
             matikan()
             return
@@ -315,6 +339,7 @@ class LayananSiaga : Service() {
         pengenal?.destroy()
         pengenal = SpeechRecognizer.createSpeechRecognizer(this).also {
             it.setRecognitionListener(pendengar)
+            Log.d(TAG, "mulaiMendengar: mulai, offline=$pakaiOffline")
             it.startListening(niatSuara(pakaiOffline))
         }
     }
@@ -324,8 +349,18 @@ class LayananSiaga : Service() {
         handler.postDelayed(ulangiMendengar, ms)
     }
 
+    /** Toast galat dibatasi satu per 2 detik agar layar tidak banjir. */
+    private fun toastGalat(pesan: String) {
+        val kini = System.currentTimeMillis()
+        if (kini - galatTerakhirToast < 2000) return
+        galatTerakhirToast = kini
+        handler.post { Toast.makeText(this, pesan, Toast.LENGTH_SHORT).show() }
+    }
+
     private val pendengar = object : RecognitionListener {
-        override fun onReadyForSpeech(params: Bundle?) {}
+        override fun onReadyForSpeech(params: Bundle?) {
+            Log.d(TAG, "onReadyForSpeech (mikrofon aktif)")
+        }
         override fun onBeginningOfSpeech() {}
         override fun onRmsChanged(rmsdB: Float) {}
         override fun onBufferReceived(buffer: ByteArray?) {}
@@ -348,6 +383,8 @@ class LayananSiaga : Service() {
             val teks = results
                 ?.getStringArrayList(SpeechRecognizer.RESULTS_RECOGNITION)
                 ?.firstOrNull().orEmpty()
+            Log.d(TAG, "onResults: terdengar='$teks' (percakapan=$percakapan)")
+            if (!percakapan) toastGalat("Terdengar: $teks")
             prosesUcapan(teks)
             if (!sedangBicara) mulaiMendengar()
         }
@@ -357,6 +394,8 @@ class LayananSiaga : Service() {
             if (pakaiOffline) {
                 pakaiOffline = false
                 galatBerturut = 0
+                Log.d(TAG, "beralih ke pengenal online")
+                toastGalat("Model offline gagal, beralih ke online")
                 jedaLalu(150)
                 return true
             }
@@ -365,6 +404,7 @@ class LayananSiaga : Service() {
 
         override fun onError(error: Int) {
             if (!berjalan || sedangBicara) return
+            Log.e(TAG, "onError: kode=$error (7=tiada mikrofon, 6=ucapan tiada, 1=jaringan, 2=jaringan lambat, 3=audio, 4=server, 5=sangat buruk, 8=sibuk, 9=rendah, 10=izin)")
             when (error) {
                 SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
                     Toast.makeText(
@@ -377,15 +417,22 @@ class LayananSiaga : Service() {
                 SpeechRecognizer.ERROR_NO_MATCH,
                 SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> jedaLalu(150)
                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> jedaLalu(1000)
+                SpeechRecognizer.ERROR_AUDIO -> {
+                    // Galat audio sering berarti mikrofon dipakai proses lain.
+                    toastGalat("Galat audio (3): mikrofon mungkin dipakai aplikasi lain")
+                    jedaLalu(1000)
+                }
                 SpeechRecognizer.ERROR_NETWORK,
                 SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
                 SpeechRecognizer.ERROR_SERVER,
                 SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED,
                 SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> {
+                    toastGalat("Galat pengenal ($error), mencoba mode lain...")
                     if (!beralihOnlineBilaPerlu()) jedaLalu(1000)
                 }
                 else -> {
                     galatBerturut++
+                    toastGalat("Galat pengenal suara kode $error")
                     // Tiga galat berturut-turut saat mode offline: coba mode online.
                     if (galatBerturut >= 3 && beralihOnlineBilaPerlu()) return
                     jedaLalu(if (galatBerturut > 5) 3000 else 400)
@@ -427,6 +474,7 @@ class LayananSiaga : Service() {
         const val AKSI_MATIKAN = "matikan"
         const val AKSI_PERCAKAPAN = "percakapan"
         const val AKSI_AKHIRI = "akhiri"
+        private const val TAG = "NazeioSiaga"
         private const val BATAS_DIAM_MS = 8000L
 
         /**
