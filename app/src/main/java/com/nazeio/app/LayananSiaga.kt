@@ -38,11 +38,9 @@ import java.util.Locale
  * atau menekan tombol berhenti. Pendengar dijeda selama Nazeio berbicara
  * agar suaranya sendiri tidak terdengar sebagai perintah.
  *
- * Aksi intent:
- * nyalakan   mulai siaga
- * percakapan mulai percakapan langsung (dari mikrofon widget)
- * akhiri     akhiri percakapan, kembali siaga
- * matikan    hentikan layanan
+ * Pengenal suara utama: SpeechRecognizer bawaan (offline bila bisa, lalu online).
+ * Bila layanan itu tidak ada di perangkat (umum pada HP ARMv7 tanpa GMS lengkap),
+ * dipakai pengenal Vosk on-device dengan model Bahasa Indonesia.
  */
 class LayananSiaga : Service() {
 
@@ -50,6 +48,7 @@ class LayananSiaga : Service() {
     private var ttsSiap = false
     private var nomorUcapan = 0
     private var pengenal: SpeechRecognizer? = null
+    private var pengenalVosk: VoskPengenal? = null
     private val handler = Handler(Looper.getMainLooper())
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private lateinit var pemroses: PemrosesPerintah
@@ -110,10 +109,8 @@ class LayananSiaga : Service() {
             }
             val id = Locale("id", "ID")
             val setLocale = tts?.setLanguage(id)
-            Log.d(TAG, "TTS setLanguage id-ID: $setLocale (0=OK, -1=missing, -2=not supported)")
+            Log.d(TAG, "TTS setLanguage id-ID: $setLocale")
             tts?.setOnUtteranceProgressListener(pendengarTts)
-            // Voice data Bahasa Indonesia belum terpasang: ingatkan pengguna
-            // agar Nazeio tidak menjawab dengan suara asing atau diam saja.
             val tersedia = tts?.isLanguageAvailable(id) ?: TextToSpeech.LANG_NOT_SUPPORTED
             Log.d(TAG, "TTS isLanguageAvailable: $tersedia")
             if (tersedia == TextToSpeech.LANG_MISSING_DATA ||
@@ -169,6 +166,7 @@ class LayananSiaga : Service() {
         scope.cancel()
         pengenal?.destroy()
         pengenal = null
+        hentikanVosk()
         tts?.shutdown()
         tts = null
         StatusBersama.set(this, Status.MATI)
@@ -183,8 +181,6 @@ class LayananSiaga : Service() {
         true
     } catch (e: RuntimeException) {
         Log.e(TAG, "startForeground ditolak", e)
-        // Izin mikrofon belum ada, atau sistem menolak layanan latar depan.
-        // Jangan gagal diam-diam: beri tahu pengguna penyebab paling umum.
         handler.post {
             Toast.makeText(
                 this,
@@ -217,6 +213,7 @@ class LayananSiaga : Service() {
         penggerak.berhenti()
         pengenal?.destroy()
         pengenal = null
+        hentikanVosk()
         tts?.stop()
         StatusBersama.set(this, Status.MATI)
         PembaruWidget.penuh(this)
@@ -301,6 +298,7 @@ class LayananSiaga : Service() {
         handler.removeCallbacks(ulangiMendengar)
         pengenal?.destroy()
         pengenal = null
+        hentikanVosk()
         nomorUcapan++
         Log.d(TAG, "bicara: $pesan")
         tts?.speak(pesan, TextToSpeech.QUEUE_FLUSH, null, nomorUcapan.toString())
@@ -330,18 +328,55 @@ class LayananSiaga : Service() {
 
     private fun mulaiMendengar() {
         if (!berjalan || sedangBicara) return
-        if (!SpeechRecognizer.isRecognitionAvailable(this)) {
-            Log.e(TAG, "mulaiMendengar: pengenal suara tidak tersedia")
-            Toast.makeText(this, "Pengenal suara tidak tersedia di perangkat ini", Toast.LENGTH_LONG).show()
-            matikan()
+        val googleAda = SpeechRecognizer.isRecognitionAvailable(this)
+        val voskAda = VoskPengenal.modelSiap(this)
+        Log.d(TAG, "mulaiMendengar: googleAda=$googleAda voskAda=$voskAda")
+        if (!googleAda) {
+            if (voskAda) {
+                mulaiVosk()
+            } else {
+                Log.e(TAG, "mulaiMendengar: tidak ada pengenal suara sama sekali")
+                Toast.makeText(
+                    this,
+                    "Pengenal suara tidak tersedia. Pasang aplikasi Google, atau letakkan model Vosk Indonesia di penyimpanan aplikasi (lihat README).",
+                    Toast.LENGTH_LONG
+                ).show()
+                matikan()
+            }
             return
         }
+        hentikanVosk()
         pengenal?.destroy()
         pengenal = SpeechRecognizer.createSpeechRecognizer(this).also {
             it.setRecognitionListener(pendengar)
             Log.d(TAG, "mulaiMendengar: mulai, offline=$pakaiOffline")
             it.startListening(niatSuara(pakaiOffline))
         }
+    }
+
+    private fun mulaiVosk() {
+        hentikanVosk()
+        pengenalVosk = VoskPengenal(
+            this,
+            padaHasil = { teks ->
+                handler.post {
+                    Log.d(TAG, "Vosk onResult: terdengar='$teks' (percakapan=$percakapan)")
+                    if (!percakapan) toastGalat("Terdengar: $teks")
+                    prosesUcapan(teks)
+                }
+            },
+            padaGalat = { pesan ->
+                handler.post {
+                    Log.e(TAG, "Vosk galat: $pesan")
+                    toastGalat("Vosk: $pesan")
+                }
+            }
+        ).also { it.mulai() }
+    }
+
+    private fun hentikanVosk() {
+        pengenalVosk?.berhenti()
+        pengenalVosk = null
     }
 
     private fun jedaLalu(ms: Long) {
@@ -404,7 +439,7 @@ class LayananSiaga : Service() {
 
         override fun onError(error: Int) {
             if (!berjalan || sedangBicara) return
-            Log.e(TAG, "onError: kode=$error (7=tiada mikrofon, 6=ucapan tiada, 1=jaringan, 2=jaringan lambat, 3=audio, 4=server, 5=sangat buruk, 8=sibuk, 9=rendah, 10=izin)")
+            Log.e(TAG, "onError: kode=$error")
             when (error) {
                 SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
                     Toast.makeText(
@@ -418,7 +453,6 @@ class LayananSiaga : Service() {
                 SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> jedaLalu(150)
                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> jedaLalu(1000)
                 SpeechRecognizer.ERROR_AUDIO -> {
-                    // Galat audio sering berarti mikrofon dipakai proses lain.
                     toastGalat("Galat audio (3): mikrofon mungkin dipakai aplikasi lain")
                     jedaLalu(1000)
                 }
@@ -433,7 +467,6 @@ class LayananSiaga : Service() {
                 else -> {
                     galatBerturut++
                     toastGalat("Galat pengenal suara kode $error")
-                    // Tiga galat berturut-turut saat mode offline: coba mode online.
                     if (galatBerturut >= 3 && beralihOnlineBilaPerlu()) return
                     jedaLalu(if (galatBerturut > 5) 3000 else 400)
                 }

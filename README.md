@@ -24,6 +24,17 @@ Nazeio adalah asisten suara pribadi untuk Android. Aplikasi mendengarkan kata pe
 2. Target utama HP ARMv7 32 bit.
 3. Bahasa utama Indonesia.
 
+## Pengenal Suara Cadangan (Vosk)
+
+Nazeio memakai pengenal suara bawaan HP bila tersedia. Bila HP tidak punya layanan pengenal Google (umum pada HP ARMv7 tanpa GMS lengkap), Nazeio otomatis beralih ke Vosk yang berjalan sepenuhnya offline di perangkat. Agar Vosk siap, pasang modelnya sekali:
+
+1. Unduh model kecil Bahasa Indonesia dari https://alphacephei.com/vosk/models (cari "vosk-model-small-id", sekitar 45 MB).
+2. Ekstrak, lalu salin foldernya ke penyimpanan aplikasi:
+   Android/data/com.nazeio.app/files/vosk-model-small-id
+3. Nyalakan kembali mode siaga. Bila foldernya ditemukan, Nazeio memakai Vosk.
+
+Tanpa model ini dan tanpa layanan Google, Nazeio tidak bisa mendengar dan akan menampilkan pesan di layar.
+
 ## Cara Build
 
 Butuh JDK 17.
