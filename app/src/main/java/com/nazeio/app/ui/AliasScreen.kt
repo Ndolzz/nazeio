@@ -1,19 +1,25 @@
 package com.nazeio.app.ui
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
@@ -68,8 +74,30 @@ fun AliasScreen() {
         modifier = Modifier
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 18.dp)
     ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(top = 22.dp, bottom = 18.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(Modifier.size(10.dp).background(Warna.Ungu, CircleShape))
+            Text(
+                "Nazeio",
+                fontSize = 15.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(start = 8.dp)
+            )
+            Spacer(Modifier.weight(1f))
+            Text(
+                "${daftar.size} alias",
+                fontSize = 11.sp,
+                fontWeight = FontWeight.SemiBold,
+                color = Warna.Biru,
+                modifier = Modifier
+                    .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(50))
+                    .padding(horizontal = 10.dp, vertical = 5.dp)
+            )
+        }
         JudulHalaman("Alias", "Satu aksi, banyak sebutan.")
 
         OutlinedTextField(
@@ -93,12 +121,17 @@ fun AliasScreen() {
                 val (aksi, tag) = kelompok[i]
                 Card(
                     modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(14.dp),
                     colors = CardDefaults.cardColors(
-                        containerColor = MaterialTheme.colorScheme.surface
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
                     ),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
-                    Column(Modifier.padding(16.dp)) {
+                    Column(
+                        Modifier
+                            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
+                            .padding(14.dp)
+                    ) {
                         Text(
                             aksi.replace("panel_", "").replace("_", " ")
                                 .replaceFirstChar { it.uppercase() },
@@ -118,7 +151,7 @@ fun AliasScreen() {
                                     fontSize = 12.sp,
                                     color = Warna.Biru,
                                     modifier = Modifier
-                                        .background(Color0xEAF1FF(), RoundedCornerShape(20.dp))
+                                        .background(MaterialTheme.colorScheme.primaryContainer, RoundedCornerShape(20.dp))
                                         .padding(horizontal = 10.dp, vertical = 4.dp)
                                 )
                             }
@@ -130,6 +163,8 @@ fun AliasScreen() {
 
         Button(
             onClick = { bukaDialog = true },
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.buttonColors(containerColor = Warna.Biru),
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(vertical = 12.dp)
@@ -176,5 +211,3 @@ fun AliasScreen() {
         )
     }
 }
-
-private fun Color0xEAF1FF() = androidx.compose.ui.graphics.Color(0xFFEAF1FF)

@@ -12,9 +12,13 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
+import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -37,7 +41,8 @@ import kotlinx.coroutines.launch
  * yang masih aktif, bisa dihapus satu per satu dari layar.
  */
 @Composable
-fun PengingatScreen() {
+fun PengingatScreen(saatKembali: () -> Unit = {}) {
+    BackHandler(onBack = saatKembali)
     val konteks = LocalContext.current
     val scope = rememberCoroutineScope()
     var daftar by remember { mutableStateOf<List<PengingatEntity>>(emptyList()) }
@@ -52,7 +57,14 @@ fun PengingatScreen() {
             .fillMaxSize()
             .padding(horizontal = 20.dp)
     ) {
-        JudulHalaman("Pengingat", "Jadwal yang sudah kamu atur.")
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            TextButton(onClick = saatKembali) {
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Kembali")
+            }
+            Column {
+                JudulHalaman("Pengingat", "Jadwal yang sudah kamu atur.")
+            }
+        }
         if (daftar.isEmpty()) {
             Column(
                 modifier = Modifier

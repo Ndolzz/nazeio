@@ -50,7 +50,12 @@ class MainActivity : ComponentActivity() {
             NazeioTheme {
                 var tab by remember { mutableIntStateOf(0) }
                 Scaffold(
-                    bottomBar = { NavigasiBawah(terpilih = tab, pilih = { tab = it }) }
+                    bottomBar = {
+                        NavigasiBawah(
+                            terpilih = if (tab == 4) 3 else tab,
+                            pilih = { tab = it }
+                        )
+                    }
                 ) { dalam ->
                     Box(
                         modifier = Modifier
@@ -61,9 +66,9 @@ class MainActivity : ComponentActivity() {
                         when (tab) {
                             0 -> BerandaScreen()
                             1 -> RiwayatScreen()
-                            2 -> PengingatScreen()
-                            3 -> AliasScreen()
-                            else -> PengaturanScreen()
+                            2 -> AliasScreen()
+                            3 -> PengaturanScreen(bukaPengingat = { tab = 4 })
+                            else -> PengingatScreen(saatKembali = { tab = 3 })
                         }
                     }
                 }

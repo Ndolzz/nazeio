@@ -20,14 +20,16 @@ fun JudulHalaman(judul: String, keterangan: String? = null) {
     ) {
         Text(
             text = judul,
-            style = MaterialTheme.typography.headlineSmall,
+            fontSize = 22.sp,
+            lineHeight = 27.sp,
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onBackground
         )
         if (keterangan != null) {
             Text(
                 text = keterangan,
-                style = MaterialTheme.typography.bodyMedium,
+                fontSize = 13.sp,
+                lineHeight = 19.sp,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )

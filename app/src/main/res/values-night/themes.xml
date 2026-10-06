@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.Nazeio" parent="android:Theme.Material.NoActionBar">
-        <item name="android:statusBarColor">#0F172A</item>
+        <item name="android:statusBarColor">#0A0F1E</item>
+        <item name="android:navigationBarColor">#0A0F1E</item>
     </style>
 </resources>

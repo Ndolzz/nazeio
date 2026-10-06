@@ -19,6 +19,9 @@ object Warna {
     val Kartu = Color(0xFFF8FAFC)
     val Garis = Color(0xFFE2E8F0)
     val Abu = Color(0xFF94A3B8)
+    val BiruLembut = Color(0xFFEAF1FF)
+    val UnguLembut = Color(0xFFF2ECFF)
+    val MerahLembut = Color(0xFFFDECEC)
 }
 
 @Composable
@@ -29,18 +32,26 @@ fun NazeioTheme(content: @Composable () -> Unit) {
             primary = Warna.Biru,
             secondary = Warna.Ungu,
             error = Warna.Merah,
-            background = Color(0xFF0F172A),
-            surface = Color(0xFF111C2F),
-            surfaceVariant = Color(0xFF1A2940)
+            background = Color(0xFF0A0F1E),
+            surface = Color(0xFF0F172A),
+            surfaceVariant = Color(0xFF162033),
+            outlineVariant = Color(0xFF243049),
+            primaryContainer = Color(0xFF16284F),
+            secondaryContainer = Color(0xFF2A1F4D),
+            errorContainer = Color(0xFF3A1A1F)
         )
     } else {
         lightColorScheme(
             primary = Warna.Biru,
             secondary = Warna.Ungu,
             error = Warna.Merah,
-            background = Color(0xFFF7F9FC),
+            background = Color.White,
             surface = Color.White,
-            surfaceVariant = Color(0xFFF1F5FA)
+            surfaceVariant = Warna.Kartu,
+            outlineVariant = Warna.Garis,
+            primaryContainer = Warna.BiruLembut,
+            secondaryContainer = Warna.UnguLembut,
+            errorContainer = Warna.MerahLembut
         )
     }
     MaterialTheme(

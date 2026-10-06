@@ -1,7 +1,6 @@
 package com.nazeio.app.ui
 
 import android.Manifest
-import android.content.Intent
 import android.content.pm.PackageManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -12,6 +11,8 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -27,15 +28,15 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.filled.Stop
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Mic
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +48,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -56,7 +62,6 @@ import androidx.core.content.ContextCompat
 import com.nazeio.app.AksiPengaturan
 import com.nazeio.app.KlienModel
 import com.nazeio.app.ControlLayanan
-import com.nazeio.app.LayananSiaga
 import com.nazeio.app.NormalisasiTeks
 import com.nazeio.app.PeluncurAplikasi
 import com.nazeio.app.Pembicara
@@ -198,205 +203,263 @@ fun BerandaScreen() {
             .fillMaxSize()
             .background(MaterialTheme.colorScheme.background)
             .verticalScroll(rememberScrollState())
-            .padding(horizontal = 20.dp)
+            .padding(horizontal = 18.dp)
     ) {
-        Spacer(Modifier.height(20.dp))
+        Spacer(Modifier.height(22.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Box(
-                Modifier
-                    .size(10.dp)
-                    .background(Warna.Biru, CircleShape)
-            )
+            Box(Modifier.size(10.dp).background(Warna.Ungu, CircleShape))
             Text(
-                text = "Nazeio",
+                "Nazeio",
                 fontWeight = FontWeight.Bold,
-                fontSize = 17.sp,
+                fontSize = 15.sp,
                 modifier = Modifier.padding(start = 8.dp)
             )
             Spacer(Modifier.weight(1f))
-            Text(
-                text = if (siaga) "Siaga" else "Mati",
-                fontSize = 11.sp,
-                color = if (siaga) Warna.Biru else Warna.TeksRedup,
-                modifier = Modifier
-                    .background(
-                        if (siaga) Color(0xFFEAF1FF) else Warna.Kartu,
-                        RoundedCornerShape(20.dp)
-                    )
-                    .padding(horizontal = 12.dp, vertical = 4.dp)
-            )
+            LabelStatus(if (mendengar) "Percakapan aktif" else if (siaga) "Siaga" else "Mati",
+                if (mendengar) Warna.Ungu else if (siaga) Warna.Biru else Warna.TeksRedup,
+                if (mendengar) MaterialTheme.colorScheme.secondaryContainer
+                else if (siaga) MaterialTheme.colorScheme.primaryContainer
+                else MaterialTheme.colorScheme.surfaceVariant)
         }
-
-        Text(
-            text = "Apa yang bisa saya bantu?",
-            fontSize = 27.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 32.dp)
-        )
-        Text(
-            text = "Ucapkan Nazeio kapan saja.",
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-
-        Box(
-            modifier = Modifier
-                .padding(top = 32.dp)
-                .size(144.dp)
-                .border(
-                    2.dp,
-                    if (mendengar) Warna.Ungu else Warna.Biru,
-                    CircleShape
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(112.dp)
-                    .background(
-                        if (mendengar) Warna.Ungu else Warna.Biru,
-                        CircleShape
-                    )
-                    .clickableTanpaRiak {
-                        if (mendengar) {
-                            pengenal?.berhenti()
-                            pembicara.hentikan()
-                            mendengar = false
-                            status = "Dibatalkan"
-                        } else {
-                            mulaiMendengar()
-                        }
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    Icons.Filled.Mic,
-                    contentDescription = "Mikrofon",
-                    tint = Color.White,
-                    modifier = Modifier.size(36.dp)
-                )
-            }
-        }
-        Text(
-            text = if (mendengar) "Sedang mendengar" else "Atau ketuk untuk berbicara",
-            fontSize = 12.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier
-                .padding(top = 12.dp)
-                .fillMaxWidth(),
-            textAlign = TextAlign.Center
-        )
 
         if (mendengar) {
-            GelombangSuara(warna = Warna.Ungu, modifier = Modifier.padding(top = 16.dp))
-        }
-
-        Card(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 28.dp),
-            colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surface
-            ),
-            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Column(Modifier.weight(1f)) {
-                    Text("Mode siaga", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
-                    Text(
-                        if (siaga) "Mendengar kata Nazeio" else "Tidak mendengarkan",
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Switch(
-                    checked = siaga,
-                    onCheckedChange = { nyala ->
-                        mauSiaga = nyala
-                        if (nyala) {
-                            if (!adaIzin) {
-                                izinLauncher.launch(
-                                    arrayOf(
-                                        Manifest.permission.RECORD_AUDIO,
-                                        Manifest.permission.POST_NOTIFICATIONS
-                                    )
-                                )
-                            } else {
-                                ControlLayanan.nyalakan(context)
-                            }
-                        } else {
-                            ControlLayanan.matikan(context)
-                        }
-                    }
-                )
-            }
-        }
-
-        if (jawaban.isNotEmpty()) {
+            Text(
+                "bicarakan perintah",
+                fontSize = 26.sp,
+                lineHeight = 32.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 34.dp)
+            )
+            Text(
+                "Nazeio terus merespons sampai kamu diam 8 detik atau berkata selesai.",
+                fontSize = 13.sp,
+                lineHeight = 19.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 6.dp)
+            )
+            GelombangSuara(warna = Warna.Ungu, modifier = Modifier.padding(vertical = 24.dp))
             Card(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp),
-                colors = CardDefaults.cardColors(
-                    containerColor = Color(0xFFF2ECFF)
-                ),
-                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+                elevation = CardDefaults.cardElevation(0.dp)
             ) {
                 Text(
-                    text = jawaban,
+                    "Mendengarkan perintah suara",
+                    color = Warna.Biru,
                     fontSize = 13.sp,
-                    modifier = Modifier.padding(16.dp)
+                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 12.dp)
                 )
             }
-        }
-
-        Text(
-            text = status,
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 12.dp)
-        )
-
-        if (pembicara.sedangBicara) {
-            TextButton(onClick = { pembicara.hentikan() }) { Text("Hentikan suara") }
-        }
-
-        if (Riwayat.entri.isNotEmpty()) {
+            Spacer(Modifier.height(20.dp))
+            Button(
+                onClick = {
+                    pengenal?.berhenti()
+                    pembicara.hentikan()
+                    mendengar = false
+                    status = "Dibatalkan"
+                },
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(14.dp)
+            ) {
+                Icon(Icons.Filled.Stop, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text("Berhenti", modifier = Modifier.padding(start = 8.dp))
+            }
+        } else {
             Text(
-                text = "TERAKHIR",
-                fontSize = 11.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(top = 28.dp, bottom = 8.dp)
+                "Apa yang bisa saya bantu?",
+                fontSize = 22.sp,
+                lineHeight = 27.sp,
+                fontWeight = FontWeight.Bold,
+                modifier = Modifier.padding(top = 24.dp)
             )
-            Riwayat.entri.take(4).forEach { e ->
-                Row(
+            Text(
+                "Ucapkan Nazeio kapan saja.",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+
+            Box(
+                modifier = Modifier
+                    .padding(top = 24.dp)
+                    .fillMaxWidth(),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 8.dp),
+                        .size(150.dp)
+                        .clip(CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(MaterialTheme.colorScheme.secondaryContainer, Color.Transparent)
+                            )
+                        )
+                        .border(1.dp, MaterialTheme.colorScheme.secondaryContainer, CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(104.dp)
+                            .clip(CircleShape)
+                            .background(Brush.linearGradient(listOf(Warna.Biru, Warna.Ungu)))
+                            .clickableTanpaRiak { mulaiMendengar() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.Mic,
+                            contentDescription = "Mulai berbicara",
+                            tint = Color.White,
+                            modifier = Modifier.size(38.dp)
+                        )
+                    }
+                }
+            }
+            Text(
+                "Atau ketuk untuk berbicara",
+                fontSize = 13.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                textAlign = TextAlign.Center
+            )
+
+            Card(
+                modifier = Modifier.fillMaxWidth().padding(top = 24.dp),
+                shape = RoundedCornerShape(14.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                elevation = CardDefaults.cardElevation(0.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text(e.first, fontSize = 14.sp, modifier = Modifier.weight(1f))
-                    Text(
-                        e.second,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = e.third,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = Modifier.padding(start = 12.dp)
+                    Column(Modifier.weight(1f)) {
+                        Text("Mode siaga", fontWeight = FontWeight.SemiBold, fontSize = 14.sp)
+                        Text(
+                            if (siaga) "Mendengar kata Nazeio" else "Tidak mendengarkan",
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    SakelarDesain(
+                        aktif = siaga,
+                        label = "Mode siaga",
+                        saatKlik = {
+                            mauSiaga = !siaga
+                            if (!siaga) {
+                                if (!adaIzin) {
+                                    izinLauncher.launch(
+                                        arrayOf(
+                                            Manifest.permission.RECORD_AUDIO,
+                                            Manifest.permission.POST_NOTIFICATIONS
+                                        )
+                                    )
+                                } else {
+                                    ControlLayanan.nyalakan(context)
+                                }
+                            } else {
+                                ControlLayanan.matikan(context)
+                            }
+                        }
                     )
                 }
             }
+
+            if (jawaban.isNotEmpty()) {
+                Card(
+                    modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                    elevation = CardDefaults.cardElevation(0.dp)
+                ) {
+                    Text(jawaban, fontSize = 13.sp, modifier = Modifier.padding(14.dp))
+                }
+            }
+            if (status != "Siap") {
+                Text(
+                    status,
+                    fontSize = 13.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 12.dp)
+                )
+            }
+            if (pembicara.sedangBicara) {
+                Text(
+                    "Hentikan suara",
+                    color = Warna.Biru,
+                    fontWeight = FontWeight.SemiBold,
+                    modifier = Modifier
+                        .clickable { pembicara.hentikan() }
+                        .padding(vertical = 12.dp)
+                )
+            }
+            if (Riwayat.entri.isNotEmpty()) {
+                Text(
+                    "TERAKHIR",
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 24.dp, bottom = 8.dp)
+                )
+                Riwayat.entri.take(2).forEach { e ->
+                    RowTerakhir(e.first, e.second)
+                }
+            }
         }
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
+    }
+}
+
+@Composable
+private fun LabelStatus(teks: String, teksWarna: Color, latar: Color) {
+    Text(
+        teks,
+        fontSize = 11.sp,
+        fontWeight = FontWeight.SemiBold,
+        color = teksWarna,
+        modifier = Modifier
+            .background(latar, RoundedCornerShape(50))
+            .padding(horizontal = 10.dp, vertical = 5.dp)
+    )
+}
+
+@Composable
+private fun RowTerakhir(teks: String, hasil: String) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(bottom = 8.dp)
+            .clip(RoundedCornerShape(14.dp))
+            .background(MaterialTheme.colorScheme.surfaceVariant)
+            .border(1.dp, MaterialTheme.colorScheme.outlineVariant, RoundedCornerShape(14.dp))
+            .padding(horizontal = 14.dp, vertical = 11.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(teks, fontSize = 13.sp, modifier = Modifier.weight(1f))
+        Text(hasil, fontSize = 11.sp, color = Warna.Biru, fontWeight = FontWeight.SemiBold)
+    }
+}
+
+@Composable
+private fun SakelarDesain(aktif: Boolean, label: String, saatKlik: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .size(width = 44.dp, height = 26.dp)
+            .clip(RoundedCornerShape(50))
+            .background(if (aktif) Warna.Biru else MaterialTheme.colorScheme.outlineVariant)
+            .semantics {
+                contentDescription = label
+                role = Role.Switch
+            }
+            .toggleable(value = aktif, role = Role.Switch, onValueChange = { saatKlik() })
+    ) {
+        Box(
+            modifier = Modifier
+                .align(if (aktif) Alignment.CenterEnd else Alignment.CenterStart)
+                .padding(horizontal = 3.dp)
+                .size(20.dp)
+                .background(Color.White, CircleShape)
+        )
     }
 }
 
