@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import org.json.JSONObject
 import org.vosk.Model
+import org.vosk.Recognizer
 import org.vosk.android.SpeechService
 import java.io.File
 
@@ -23,12 +24,15 @@ class VoskPengenal(
     private val padaGalat: (String) -> Unit
 ) {
 
+    private var model: Model? = null
     private var layanan: SpeechService? = null
 
     fun mulai() {
         try {
-            val model = Model(lokasiModel(context).absolutePath)
-            layanan = SpeechService(model, 16000.0f).also {
+            val m = Model(lokasiModel(context).absolutePath)
+            model = m
+            val pengenal = Recognizer(m, 16000.0f)
+            layanan = SpeechService(pengenal, 16000.0f).also {
                 it.startListening(pendengar)
             }
             Log.d(TAG, "mulai: mendengarkan dengan Vosk")
@@ -41,11 +45,17 @@ class VoskPengenal(
     fun berhenti() {
         try {
             layanan?.stop()
-            layanan?.close()
+            layanan?.shutdown()
         } catch (e: Exception) {
             Log.e(TAG, "berhenti gagal", e)
         }
         layanan = null
+        try {
+            model?.close()
+        } catch (e: Exception) {
+            Log.e(TAG, "tutup model gagal", e)
+        }
+        model = null
     }
 
     private val pendengar = object : org.vosk.android.RecognitionListener {
