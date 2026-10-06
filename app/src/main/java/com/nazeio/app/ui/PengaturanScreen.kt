@@ -108,13 +108,7 @@ fun PengaturanScreen() {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(Modifier.height(16.dp))
-        Text("Pengaturan", fontSize = 24.sp, fontWeight = FontWeight.Bold)
-        Text(
-            "Sesuaikan Nazeio sesukamu.",
-            fontSize = 13.sp,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
+        JudulHalaman("Pengaturan", "Sesuaikan Nazeio sesukamu.")
 
         // ===== TAMPILAN =====
         BagianJudul("TAMPILAN")

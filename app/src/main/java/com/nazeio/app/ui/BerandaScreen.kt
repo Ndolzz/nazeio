@@ -200,7 +200,7 @@ fun BerandaScreen() {
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 20.dp)
     ) {
-        Spacer(Modifier.height(16.dp))
+        Spacer(Modifier.height(20.dp))
         Row(verticalAlignment = Alignment.CenterVertically) {
             Box(
                 Modifier
@@ -210,13 +210,13 @@ fun BerandaScreen() {
             Text(
                 text = "Nazeio",
                 fontWeight = FontWeight.Bold,
-                fontSize = 16.sp,
+                fontSize = 17.sp,
                 modifier = Modifier.padding(start = 8.dp)
             )
             Spacer(Modifier.weight(1f))
             Text(
                 text = if (siaga) "Siaga" else "Mati",
-                fontSize = 12.sp,
+                fontSize = 11.sp,
                 color = if (siaga) Warna.Biru else Warna.TeksRedup,
                 modifier = Modifier
                     .background(
@@ -229,9 +229,9 @@ fun BerandaScreen() {
 
         Text(
             text = "Apa yang bisa saya bantu?",
-            fontSize = 24.sp,
+            fontSize = 27.sp,
             fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(top = 28.dp)
+            modifier = Modifier.padding(top = 32.dp)
         )
         Text(
             text = "Ucapkan Nazeio kapan saja.",
@@ -242,8 +242,8 @@ fun BerandaScreen() {
 
         Box(
             modifier = Modifier
-                .padding(top = 36.dp)
-                .size(132.dp)
+                .padding(top = 32.dp)
+                .size(144.dp)
                 .border(
                     2.dp,
                     if (mendengar) Warna.Ungu else Warna.Biru,
@@ -253,7 +253,7 @@ fun BerandaScreen() {
         ) {
             Box(
                 modifier = Modifier
-                    .size(104.dp)
+                    .size(112.dp)
                     .background(
                         if (mendengar) Warna.Ungu else Warna.Biru,
                         CircleShape
@@ -297,8 +297,9 @@ fun BerandaScreen() {
                 .fillMaxWidth()
                 .padding(top = 28.dp),
             colors = CardDefaults.cardColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            )
+                containerColor = MaterialTheme.colorScheme.surface
+            ),
+            elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
         ) {
             Row(
                 modifier = Modifier
@@ -344,7 +345,8 @@ fun BerandaScreen() {
                     .padding(top = 12.dp),
                 colors = CardDefaults.cardColors(
                     containerColor = Color(0xFFF2ECFF)
-                )
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
                 Text(
                     text = jawaban,
