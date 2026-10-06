@@ -1,6 +1,5 @@
 package com.nazeio.app
 
-import android.app.ActivityManager
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -62,6 +61,10 @@ class LayananSiaga : Service() {
     private var matikanSetelahBicara = false
     private var galatBerturut = 0
 
+    // Prioritas awal: pengenal offline agar hemat kuota dan cepat.
+    // Bila offline ternyata tidak tersedia atau terus gagal, beralih ke online.
+    private var pakaiOffline = true
+
     private val batasDiam = Runnable {
         if (percakapan) akhiriPercakapan("Percakapan selesai")
     }
@@ -83,13 +86,29 @@ class LayananSiaga : Service() {
 
     override fun onCreate() {
         super.onCreate()
+        aktif = true
         pemroses = PemrosesPerintah(this)
         penggerak = PenggerakWidget(this)
         tts = TextToSpeech(this) { hasil ->
             ttsSiap = hasil == TextToSpeech.SUCCESS
             if (ttsSiap) {
-                tts?.language = Locale("id", "ID")
+                val id = Locale("id", "ID")
+                tts?.language = id
                 tts?.setOnUtteranceProgressListener(pendengarTts)
+                // Voice data Bahasa Indonesia belum terpasang: ingatkan pengguna
+                // agar Nazeio tidak menjawab dengan suara asing atau diam saja.
+                val tersedia = tts?.isLanguageAvailable(id) ?: TextToSpeech.LANG_NOT_SUPPORTED
+                if (tersedia == TextToSpeech.LANG_MISSING_DATA ||
+                    tersedia == TextToSpeech.LANG_NOT_SUPPORTED
+                ) {
+                    handler.post {
+                        Toast.makeText(
+                            this,
+                            "Suara Bahasa Indonesia belum terpasang. Pasang voice data Google di pengaturan agar Nazeio bisa menjawab.",
+                            Toast.LENGTH_LONG
+                        ).show()
+                    }
+                }
             }
         }
         // Isi tabel alias awal agar perintah suara berfungsi walau aplikasi belum dibuka.
@@ -125,6 +144,7 @@ class LayananSiaga : Service() {
     override fun onDestroy() {
         berjalan = false
         percakapan = false
+        aktif = false
         handler.removeCallbacksAndMessages(null)
         penggerak.berhenti()
         scope.cancel()
@@ -144,6 +164,14 @@ class LayananSiaga : Service() {
         true
     } catch (e: RuntimeException) {
         // Izin mikrofon belum ada, atau sistem menolak layanan latar depan.
+        // Jangan gagal diam-diam: beri tahu pengguna penyebab paling umum.
+        handler.post {
+            Toast.makeText(
+                this,
+                "Nazeio belum bisa mendengar. Pastikan izin mikrofon sudah diberikan, lalu nyalakan siaga dari dalam aplikasi.",
+                Toast.LENGTH_LONG
+            ).show()
+        }
         StatusBersama.set(this, Status.MATI)
         PembaruWidget.penuh(this)
         stopSelf()
@@ -153,6 +181,8 @@ class LayananSiaga : Service() {
     private fun mulaiLayanan() {
         if (berjalan) return
         berjalan = true
+        pakaiOffline = true
+        galatBerturut = 0
         StatusBersama.set(this, Status.SIAGA)
         PembaruWidget.penuh(this)
         penggerak.mulai()
@@ -266,10 +296,11 @@ class LayananSiaga : Service() {
 
     // Suara masuk
 
-    private fun niatSuara() = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+    private fun niatSuara(offline: Boolean) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, "id-ID")
-        putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
+        putExtra(RecognizerIntent.EXTRA_LANGUAGE_PREFERENCE, "id-ID")
+        if (offline) putExtra(RecognizerIntent.EXTRA_PREFER_OFFLINE, true)
         putExtra(RecognizerIntent.EXTRA_PARTIAL_RESULTS, true)
         putExtra(RecognizerIntent.EXTRA_CALLING_PACKAGE, packageName)
     }
@@ -284,7 +315,7 @@ class LayananSiaga : Service() {
         pengenal?.destroy()
         pengenal = SpeechRecognizer.createSpeechRecognizer(this).also {
             it.setRecognitionListener(pendengar)
-            it.startListening(niatSuara())
+            it.startListening(niatSuara(pakaiOffline))
         }
     }
 
@@ -321,20 +352,42 @@ class LayananSiaga : Service() {
             if (!sedangBicara) mulaiMendengar()
         }
 
+        /** Bila pengenal offline terus gagal atau butuh jaringan, beralih ke online. */
+        private fun beralihOnlineBilaPerlu(): Boolean {
+            if (pakaiOffline) {
+                pakaiOffline = false
+                galatBerturut = 0
+                jedaLalu(150)
+                return true
+            }
+            return false
+        }
+
         override fun onError(error: Int) {
             if (!berjalan || sedangBicara) return
             when (error) {
                 SpeechRecognizer.ERROR_INSUFFICIENT_PERMISSIONS -> {
                     Toast.makeText(
-                        this@LayananSiaga, "Izin mikrofon belum diberikan", Toast.LENGTH_LONG
+                        this@LayananSiaga,
+                        "Mikrofon diblokir. Buka aplikasi Nazeio, beri izin mikrofon, lalu nyalakan siaga dari dalam aplikasi.",
+                        Toast.LENGTH_LONG
                     ).show()
                     matikan()
                 }
                 SpeechRecognizer.ERROR_NO_MATCH,
                 SpeechRecognizer.ERROR_SPEECH_TIMEOUT -> jedaLalu(150)
                 SpeechRecognizer.ERROR_RECOGNIZER_BUSY -> jedaLalu(1000)
+                SpeechRecognizer.ERROR_NETWORK,
+                SpeechRecognizer.ERROR_NETWORK_TIMEOUT,
+                SpeechRecognizer.ERROR_SERVER,
+                SpeechRecognizer.ERROR_LANGUAGE_NOT_SUPPORTED,
+                SpeechRecognizer.ERROR_LANGUAGE_UNAVAILABLE -> {
+                    if (!beralihOnlineBilaPerlu()) jedaLalu(1000)
+                }
                 else -> {
                     galatBerturut++
+                    // Tiga galat berturut-turut saat mode offline: coba mode online.
+                    if (galatBerturut >= 3 && beralihOnlineBilaPerlu()) return
                     jedaLalu(if (galatBerturut > 5) 3000 else 400)
                 }
             }
@@ -376,11 +429,13 @@ class LayananSiaga : Service() {
         const val AKSI_AKHIRI = "akhiri"
         private const val BATAS_DIAM_MS = 8000L
 
-        @Suppress("DEPRECATION")
-        fun sedangJalan(context: Context): Boolean {
-            val am = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            return am.getRunningServices(Int.MAX_VALUE)
-                .any { it.service.className == LayananSiaga::class.java.name }
-        }
+        /**
+         * Penanda hidup proses layanan, lebih andal daripada getRunningServices
+         * yang sudah deprecated dan sering salah lapor.
+         */
+        @Volatile
+        var aktif: Boolean = false
+
+        fun sedangJalan(context: Context): Boolean = aktif
     }
 }
