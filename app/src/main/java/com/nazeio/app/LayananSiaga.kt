@@ -38,9 +38,8 @@ import java.util.Locale
  * atau menekan tombol berhenti. Pendengar dijeda selama Nazeio berbicara
  * agar suaranya sendiri tidak terdengar sebagai perintah.
  *
- * Pengenal suara utama: SpeechRecognizer bawaan (offline bila bisa, lalu online).
- * Bila layanan itu tidak ada di perangkat (umum pada HP ARMv7 tanpa GMS lengkap),
- * dipakai pengenal Vosk on-device dengan model Bahasa Indonesia.
+ * Pengenal suara: SpeechRecognizer bawaan, offline lebih dulu lalu online.
+ * Vosk on-device dipakai bila layanan bawaan tidak ada.
  */
 class LayananSiaga : Service() {
 
@@ -60,13 +59,7 @@ class LayananSiaga : Service() {
     private var hanyaPercakapan = false
     private var matikanSetelahBicara = false
     private var galatBerturut = 0
-
-    // Prioritas awal: pengenal offline agar hemat kuota dan cepat.
-    // Bila offline ternyata tidak tersedia atau terus gagal, beralih ke online.
     private var pakaiOffline = true
-
-    // Diagnostik sementara: tampilkan di layar apa yang didengar dan galat apa
-    // yang muncul. Dimatikan setelah penyebab "Nazeio tidak mendengar" ketemu.
     private var galatTerakhirToast = 0L
 
     private val batasDiam = Runnable {
@@ -125,7 +118,6 @@ class LayananSiaga : Service() {
                 }
             }
         }
-        // Isi tabel alias awal agar perintah suara berfungsi walau aplikasi belum dibuka.
         scope.launch(Dispatchers.IO) { RepositoriAlias(this@LayananSiaga).pastikanDataAwal() }
     }
 
@@ -174,8 +166,6 @@ class LayananSiaga : Service() {
         super.onDestroy()
     }
 
-    // Siklus layanan
-
     private fun masukLatarDepan(): Boolean = try {
         startForeground(ID_NOTIF, notifikasi())
         true
@@ -221,8 +211,6 @@ class LayananSiaga : Service() {
         stopSelf()
     }
 
-    // Percakapan
-
     private fun mulaiPercakapan(sapaan: String?) {
         percakapan = true
         galatBerturut = 0
@@ -245,7 +233,6 @@ class LayananSiaga : Service() {
         if (pesan != null) bicara(pesan) else if (matikanSetelahBicara) matikan()
     }
 
-    /** Pewaktu diam 8 detik. Selalu dibatalkan dulu agar tidak menumpuk. */
     private fun aturPewaktu() {
         handler.removeCallbacks(batasDiam)
         if (percakapan) handler.postDelayed(batasDiam, BATAS_DIAM_MS)
@@ -285,8 +272,6 @@ class LayananSiaga : Service() {
         }
     }
 
-    // Suara keluar
-
     private fun bicara(pesan: String) {
         handler.removeCallbacks(batasDiam)
         if (!ttsSiap) {
@@ -315,8 +300,6 @@ class LayananSiaga : Service() {
         mulaiMendengar()
     }
 
-    // Suara masuk
-
     private fun niatSuara(offline: Boolean) = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
         putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
         putExtra(RecognizerIntent.EXTRA_LANGUAGE, "id-ID")
@@ -338,7 +321,7 @@ class LayananSiaga : Service() {
                 Log.e(TAG, "mulaiMendengar: tidak ada pengenal suara sama sekali")
                 Toast.makeText(
                     this,
-                    "Pengenal suara tidak tersedia. Pasang aplikasi Google, atau letakkan model Vosk Indonesia di penyimpanan aplikasi (lihat README).",
+                    "Pengenal suara tidak tersedia. Pastikan aplikasi Google terpasang dan diperbarui, lalu nyalakan kembali siaga.",
                     Toast.LENGTH_LONG
                 ).show()
                 matikan()
@@ -384,7 +367,6 @@ class LayananSiaga : Service() {
         handler.postDelayed(ulangiMendengar, ms)
     }
 
-    /** Toast galat dibatasi satu per 2 detik agar layar tidak banjir. */
     private fun toastGalat(pesan: String) {
         val kini = System.currentTimeMillis()
         if (kini - galatTerakhirToast < 2000) return
@@ -424,7 +406,6 @@ class LayananSiaga : Service() {
             if (!sedangBicara) mulaiMendengar()
         }
 
-        /** Bila pengenal offline terus gagal atau butuh jaringan, beralih ke online. */
         private fun beralihOnlineBilaPerlu(): Boolean {
             if (pakaiOffline) {
                 pakaiOffline = false
@@ -474,8 +455,6 @@ class LayananSiaga : Service() {
         }
     }
 
-    // Notifikasi
-
     private fun buatKanal() {
         val nm = getSystemService(NotificationManager::class.java)
         nm.createNotificationChannel(
@@ -510,10 +489,6 @@ class LayananSiaga : Service() {
         private const val TAG = "NazeioSiaga"
         private const val BATAS_DIAM_MS = 8000L
 
-        /**
-         * Penanda hidup proses layanan, lebih andal daripada getRunningServices
-         * yang sudah deprecated dan sering salah lapor.
-         */
         @Volatile
         var aktif: Boolean = false
 
