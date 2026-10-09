@@ -1,6 +1,6 @@
 # Rencana Integrasi Teknis Naze Engine
 
-Status: Draf. Referensi spesifikasi 16. Pekerjaan dimulai setelah M007 pada repositori `model-naze2.0` selesai dan pemilik proyek menyetujui batas ukuran model (OD-118).
+Status: Draf. Referensi spesifikasi 16. Prasyarat terpenuhi: M007 pada repositori `model-naze2.0` selesai (pytest penuh hijau di CI, 2026-10-09) dan pemilik proyek menyetujui batas ukuran model OD-118 → DECISION-018: checkpoint ≤ 1 MB, config D=64, H=4, L=2, d_ff=128, T_max=128.
 
 ## 1. Ringkasan
 
@@ -24,7 +24,7 @@ Integrasi mencakup tiga lapisan pekerjaan pada dua repositori.
 2. Nama kunci sama dengan kamus datar model: `emb.E`, `pos.P`, `blk{i}.attn.{q,k,v,o}.{W,b}`, `blk{i}.attn.norm.{gamma,beta}`, `blk{i}.ffn.fc{1,2}.{W,b}`, `blk{i}.ffn.norm.{gamma,beta}`, `final.{gamma,beta}`, `head.{W,b}`.
 3. Bobot dikonversi dari float64 ke float32 supaya ukuran berkas kecil. Urutan kunci tetap dan stempel waktu berkas zip tetap supaya isi berkas identik antar pembuatan ulang.
 4. Berkas memuat satu kunci metadata berisi: d_model, num_heads, num_layers, d_ff, max_sequence_length, vocab_size 256, versi bobot, dan checksum SHA 256.
-5. Estimasi ukuran: jumlah parameter untuk d_model 64, 2 lapis, d_ff 128, max_sequence_length 64 sekitar 103 ribu sehingga berkas float32 sekitar 0,4 MB. Jauh di bawah batas 20 MB.
+5. Estimasi ukuran sesuai DECISION-018 (T_max=128): sekitar 108 ribu parameter sehingga berkas float32 sekitar 0,43 MB. Jauh di bawah batas 20 MB dan batas checkpoint 1 MB.
 6. Setiap versi bobot dan hasil evaluasinya dicatat pada folder docs di repositori `model-naze2.0` sesuai kriteria selesai spesifikasi 16.
 
 ## 4. Pembaca npz pada Kotlin
@@ -56,7 +56,7 @@ Integrasi mencakup tiga lapisan pekerjaan pada dua repositori.
 ## 8. Tahapan pekerjaan
 
 1. Selesaikan tugas M007 T015 sampai T018 pada repositori `model-naze2.0`.
-2. Pemilik proyek menyetujui batas ukuran model pada OD-118. Usulan batas 5 MB, jauh di bawah 20 MB.
+2. Selesai: pemilik proyek menyetujui batas ukuran model pada OD-118 → DECISION-018 (≤ 1 MB checkpoint float64, 2026-10-09).
 3. Tugas ekspor bobot, korpus perintah, dan evaluasi pada repositori `model-naze2.0`.
 4. Modul Kotlin pembaca npy dan unit test golden pada nazeio.
 5. Penyambungan alur sebelum rute spesifikasi 03 beserta test offline.
